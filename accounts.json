@@ -1,0 +1,50 @@
+[
+  {
+    "username": "admin",
+    "password": "admin123", 
+    "role": "ADMIN",
+    "email": "ethankhoo09@gmail.com",
+    "fullName": "System Administrator",
+    "contactNumber": "+1-555-0001",
+    "address": "123 Admin Street, Business District",
+    "dateOfBirth": "1985-01-15",
+    "licenseNumber": "ADM123456789",
+    "emergencyContact": "Family Contact +60-12-999-9999"
+  },
+  {
+    "username": "user1",
+    "password": "user123",
+    "role": "CUSTOMER", 
+    "email": "ethankhoo09@gmail.com",
+    "fullName": "Ethan Khoo Tsui Ern",
+    "contactNumber": "+60-12-345-6789",
+    "address": "456 Customer Avenue, Residential Area, Kuala Lumpur",
+    "dateOfBirth": "1995-03-20",
+    "licenseNumber": "DL987654321",
+    "emergencyContact": "Family Contact +60-12-999-8888"
+  },
+  {
+    "username": "user2", 
+    "password": "user456",
+    "role": "CUSTOMER",
+    "email": "sarah.wong@email.com", 
+    "fullName": "Sarah Wong Li Mei",
+    "contactNumber": "+60-17-888-9999",
+    "address": "789 Garden Street, Petaling Jaya, Selangor",
+    "dateOfBirth": "1992-07-12",
+    "licenseNumber": "DL456789123",
+    "emergencyContact": "Emergency Contact +60-17-111-2222"
+  },
+  {
+    "username": "user3",
+    "password": "user789", 
+    "role": "CUSTOMER",
+    "email": "ahmad.rahman@gmail.com",
+    "fullName": "Ahmad Rahman bin Abdullah", 
+    "contactNumber": "+60-19-777-8888",
+    "address": "321 Harmony Road, Shah Alam, Selangor",
+    "dateOfBirth": "1988-11-05",
+    "licenseNumber": "DL789123456",
+    "emergencyContact": "Family Emergency +60-19-555-4444"
+  }
+] 

@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "brand": "Toyota",
+    "model": "Camry",
+    "carPlate": "ABC-123",
+    "vehicleType": "CAR",
+    "fuelType": "PETROL",
+    "status": "AVAILABLE",
+    "insuranceRate": 0.1,
+    "basePrice": 50.0,
+    "longTermDiscounts": {"7": 0.1, "14": 0.15, "30": 0.2}
+  },
+  {
+    "id": 2,
+    "brand": "Honda",
+    "model": "Civic",
+    "carPlate": "XYZ-456",
+    "vehicleType": "CAR",
+    "fuelType": "HYBRID",
+    "status": "AVAILABLE",
+    "insuranceRate": 0.12,
+    "basePrice": 45.0,
+    "longTermDiscounts": {"7": 0.08, "14": 0.12}
+  },
+  {
+    "id": 3,
+    "brand": "Tesla",
+    "model": "Model 3",
+    "carPlate": "ELE-789",
+    "vehicleType": "CAR",
+    "fuelType": "ELECTRIC",
+    "status": "AVAILABLE",
+    "insuranceRate": 0.08,
+    "basePrice": 80.0,
+    "longTermDiscounts": {"3": 0.05, "7": 0.12, "14": 0.18}
+  },
+  {
+    "id": 4,
+    "brand": "Harley-Davidson",
+    "model": "Street 750",
+    "carPlate": "MOT-001",
+    "vehicleType": "MOTORCYCLE",
+    "fuelType": "PETROL",
+    "status": "AVAILABLE",
+    "insuranceRate": 0.15,
+    "basePrice": 35.0,
+    "longTermDiscounts": {"7": 0.1}
+  },
+  {
+    "id": 5,
+    "brand": "Ford",
+    "model": "Transit",
+    "carPlate": "VAN-555",
+    "vehicleType": "VAN",
+    "fuelType": "DIESEL",
+    "status": "AVAILABLE",
+    "insuranceRate": 0.18,
+    "basePrice": 75.0,
+    "longTermDiscounts": {"5": 0.08, "10": 0.15}
+  }
+]
