@@ -1,7 +1,9 @@
+package services;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import models.*;
 
 /**
  * Ticket Service - manages rental confirmation tickets
@@ -188,16 +190,32 @@ public class TicketService {
      */
     public void displayAllTickets() {
         if (tickets.isEmpty()) {
-            System.out.println("No tickets in the system.");
+            System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
+            System.out.println("║                     NO TICKETS FOUND                             ║");
+            System.out.println("╠══════════════════════════════════════════════════════════════════╣");
+            System.out.println("║ No tickets have been generated in the system yet.                ║");
+            System.out.println("║ Tickets are created when admin approves rental requests.         ║");
+            System.out.println("╚══════════════════════════════════════════════════════════════════╝");
             return;
         }
         
-        System.out.println("\n=== All System Tickets ===");
-        System.out.println("Total tickets: " + tickets.size());
+        System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
+        System.out.println("║                       ALL SYSTEM TICKETS                         ║");
+        System.out.println("╠══════════════════════════════════════════════════════════════════╣");
+        System.out.printf("║ Total Tickets: %-49d ║%n", tickets.size());
+        System.out.println("╚══════════════════════════════════════════════════════════════════╝");
         
+        int index = 1;
         for (Ticket ticket : tickets.values()) {
-            System.out.println((ticket.isUsed() ? "[USED] " : "[VALID] "));
-            ticket.displayCompact();
+            System.out.printf("\n%d. %s\n", index++, (ticket.isUsed() ? "🔴 [USED]" : "🟢 [VALID]"));
+            System.out.println("┌──────────────────────────────────────────────────────────────────┐");
+            System.out.printf("│ Ticket ID: %-53s │%n", ticket.getTicketId());
+            System.out.printf("│ Rental ID: %-53d │%n", ticket.getRentalId());
+            System.out.printf("│ Customer: %-54s │%n", ticket.getCustomerName());
+            System.out.printf("│ Vehicle: %-55s │%n", ticket.getVehicleInfo() + " (" + ticket.getCarPlate() + ")");
+            System.out.printf("│ Period: %-56s │%n", ticket.getStartDate() + " to " + ticket.getEndDate());
+            System.out.printf("│ Total Fee: RM%-51.2f │%n", ticket.getTotalFee());
+            System.out.println("└──────────────────────────────────────────────────────────────────┘");
         }
     }
     

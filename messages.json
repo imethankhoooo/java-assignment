@@ -1,3 +1,26 @@
 [
-  
+  {
+    "id": "",
+    "sender": "",
+    "recipient": "",
+    "subject": "",
+    "content": "",
+    "type": "SYSTEM_MESSAGE",
+    "timestamp": "2025-08-24 00:00:16",
+    "isRead": false,
+    "relatedRentalId": "",
+    "emailSent": false
+  },
+  {
+    "id": "MSG1755964954925_508",
+    "sender": "admin",
+    "recipient": "user1",
+    "subject": "Rental Approved - PDF Ticket Attached - Camry",
+    "content": "Excellent news! Your rental request for Camry has been approved!\nYour rental ticket has been generated: TKT-20250824000234-AFB75D77\nA beautiful PDF ticket has been sent to your email with all the details.\nIMPORTANT: Please save the PDF ticket. You will need it for vehicle pickup.\nPickup Instructions:\n- Bring valid government-issued ID\n- Present your PDF ticket (digital or printed copy)\n- Arrive 15 minutes before rental start time\n- Vehicle inspection will be conducted before handover\nCheck your email for the complete PDF ticket!",
+    "type": "RENTAL_APPROVAL",
+    "timestamp": "2025-08-24 00:02:34",
+    "isRead": true,
+    "relatedRentalId": "1",
+    "emailSent": false
+  }
 ]

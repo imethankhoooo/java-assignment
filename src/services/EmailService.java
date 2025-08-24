@@ -1,3 +1,4 @@
+package services;
 import java.io.*;
 import java.net.*;
 import java.util.Base64;
@@ -11,7 +12,7 @@ import javax.net.ssl.*;
 public class EmailService {
     private static final Logger logger = Logger.getLogger(EmailService.class.getName());
     
-    // SMTP配置 - 从配置文件读取
+    // SMTP Configuration - Read from Configuration File
     private String smtpHost;
     private int smtpPort;
     private String senderEmail;
@@ -30,42 +31,30 @@ public class EmailService {
             
             smtpHost = props.getProperty("smtp.host", "smtp.gmail.com");
             smtpPort = Integer.parseInt(props.getProperty("smtp.port", "587"));
-            senderEmail = props.getProperty("sender.email", "your-rental-system@gmail.com");
-            senderPassword = props.getProperty("sender.password", "your-app-password");
+            senderEmail = props.getProperty("sender.email", "ethankhoo09@gmail.com");
+            senderPassword = props.getProperty("sender.password", "wkxeqfqsvwldtodm");
             useTLS = Boolean.parseBoolean(props.getProperty("smtp.use_tls", "true"));
             useAuth = Boolean.parseBoolean(props.getProperty("smtp.use_auth", "true"));
             
         } catch (IOException e) {
-            // 只在真正失败时显示警告
+            // Show warnings only on true failures
             System.err.println("Warning: Could not load smtp_config.properties, using default values");
-            // 使用默认值
+            // Use default values
             smtpHost = "smtp.gmail.com";
             smtpPort = 587;
-            senderEmail = "your-rental-system@gmail.com";
-            senderPassword = "your-app-password";
+            senderEmail = "ethankhoo09@gmail.com";
+            senderPassword = "wkxeqfqsvwldtodm";
             useTLS = true;
             useAuth = true;
         }
     }
     
-    public boolean sendEmail(String recipientEmail, String subject, String content) {
-        return sendEmailWithAttachment(recipientEmail, subject, content, null, null);
-    }
+
     
     public boolean sendEmailWithAttachment(String recipientEmail, String subject, String content, byte[] attachmentData, String attachmentName) {
         try {
-            if (useAuth && (senderEmail.equals("your-rental-system@gmail.com") || senderPassword.equals("your-app-password"))) {
-                // 如果还在使用默认配置，回退到控制台显示
-                System.out.println("=== SMTP NOT CONFIGURED ===");
-                System.out.println("Please update smtp_config.properties with your email settings");
-                fallbackToConsoleDisplay(recipientEmail, subject, content);
-                if (attachmentData != null) {
-                    System.out.println("Attachment: " + attachmentName + " (" + attachmentData.length + " bytes)");
-                }
-                return false;
-            }
             
-            // 尝试SMTP发送
+            // Attempt SMTP sending
             boolean success = sendViaSMTP(recipientEmail, subject, content, attachmentData, attachmentName);
             
             if (success) {
@@ -79,7 +68,7 @@ public class EmailService {
                 System.out.println("Email sent successfully via SMTP to: " + recipientEmail);
                 return true;
             } else {
-                // SMTP失败，回退到控制台显示
+                // SMTP failed, fallback to console display
                 fallbackToConsoleDisplay(recipientEmail, subject, content);
                 if (attachmentData != null) {
                     System.out.println("Attachment: " + attachmentName + " (" + attachmentData.length + " bytes)");
@@ -91,7 +80,7 @@ public class EmailService {
             logger.log(Level.WARNING, "Failed to send email via SMTP to: " + recipientEmail, e);
             System.err.println("SMTP Email Error: " + e.getMessage());
             
-            // 如果SMTP失败，回退到控制台显示
+            // If SMTP fails, fallback to console display
             fallbackToConsoleDisplay(recipientEmail, subject, content);
             if (attachmentData != null) {
                 System.out.println("Attachment: " + attachmentName + " (" + attachmentData.length + " bytes)");
@@ -106,104 +95,104 @@ public class EmailService {
         PrintWriter writer = null;
         
         try {
-            // 连接到SMTP服务器
+            // Connect to SMTP server
             socket = new Socket(smtpHost, smtpPort);
-            socket.setSoTimeout(10000); // 10秒超时
+            socket.setSoTimeout(10000); // 10 seconds timeout
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             writer = new PrintWriter(socket.getOutputStream(), true);
             
-            // 读取服务器响应
+            // Read server response
             String response = reader.readLine();
             if (!response.startsWith("220")) {
-                throw new IOException("SMTP服务器连接失败: " + response);
+                throw new IOException("SMTP server connection failure: " + response);
             }
             
-            // EHLO命令
+            // EHLO command
             writer.println("EHLO " + smtpHost);
             
-            // 读取EHLO响应（可能有多行）
+            // Read EHLO response (may have multiple lines)
             response = reader.readLine();
             if (!response.startsWith("250")) {
-                throw new IOException("EHLO命令失败: " + response);
+                throw new IOException("EHLO command failed: " + response);
             }
             
-            // 读取剩余的EHLO响应行
+            // Read remaining EHLO response lines
             while (reader.ready()) {
                 String line = reader.readLine();
-                if (line.startsWith("250 ")) break; // 最后一行以"250 "开头
+                if (line.startsWith("250 ")) break; // Last line starts with "250 "
             }
             
-            // 如果使用TLS，启动TLS并进行SSL握手
+            // If using TLS, start TLS and perform SSL handshake
             if (useTLS) {
                 writer.println("STARTTLS");
                 response = reader.readLine();
                 if (!response.startsWith("220")) {
-                    // STARTTLS失败，尝试不使用TLS继续
+                    // STARTTLS failed, try to continue without TLS
                 } else {
-                    // 创建SSL上下文
+                    // Create SSL context
                     SSLContext sslContext = SSLContext.getInstance("TLS");
                     sslContext.init(null, null, null);
                     
-                    // 创建SSL Socket
+                    // Create SSL Socket
                     SSLSocketFactory factory = sslContext.getSocketFactory();
                     SSLSocket sslSocket = (SSLSocket) factory.createSocket(socket, smtpHost, smtpPort, true);
                     sslSocket.setUseClientMode(true);
                     sslSocket.startHandshake();
                     
-                    // 更新reader和writer以使用SSL连接
+                    // Update reader and writer to use SSL connection
                     reader = new BufferedReader(new InputStreamReader(sslSocket.getInputStream()));
                     writer = new PrintWriter(sslSocket.getOutputStream(), true);
-                    socket = sslSocket; // 更新socket引用
+                    socket = sslSocket; // Update socket reference
                 }
             }
             
-            // 身份验证
+            // Authentication
             if (useAuth) {
                 writer.println("AUTH LOGIN");
                 response = reader.readLine();
                 if (!response.startsWith("334")) {
-                    throw new IOException("AUTH LOGIN命令失败: " + response);
+                    throw new IOException("AUTH LOGIN command failed: " + response);
                 }
                 
-                // 发送用户名（Base64编码）
+                // Send username (Base64 encoded)
                 String encodedUsername = Base64.getEncoder().encodeToString(senderEmail.getBytes());
                 writer.println(encodedUsername);
                 response = reader.readLine();
                 if (!response.startsWith("334")) {
-                    throw new IOException("用户名验证失败: " + response);
+                    throw new IOException("Username authentication failed: " + response);
                 }
                 
-                // 发送密码（Base64编码）
+                // Send password (Base64 encoded)
                 String encodedPassword = Base64.getEncoder().encodeToString(senderPassword.getBytes());
                 writer.println(encodedPassword);
                 response = reader.readLine();
                 if (!response.startsWith("235")) {
-                    throw new IOException("密码验证失败: " + response);
+                    throw new IOException("Password authentication failed: " + response);
                 }
             }
             
-            // MAIL FROM命令
+            // MAIL FROM command
             writer.println("MAIL FROM:<" + senderEmail + ">");
             response = reader.readLine();
             if (!response.startsWith("250")) {
-                throw new IOException("MAIL FROM命令失败: " + response);
+                throw new IOException("MAIL FROM command failed: " + response);
             }
             
-            // RCPT TO命令
+            // RCPT TO command
             writer.println("RCPT TO:<" + recipientEmail + ">");
             response = reader.readLine();
             if (!response.startsWith("250")) {
-                throw new IOException("RCPT TO命令失败: " + response);
+                throw new IOException("RCPT TO command failed: " + response);
             }
             
-            // DATA命令
+            // DATA command
             writer.println("DATA");
             response = reader.readLine();
             if (!response.startsWith("354")) {
-                throw new IOException("DATA命令失败: " + response);
+                throw new IOException("DATA command failed: " + response);
             }
             
-            // 发送邮件头和内容
+            // Send email headers and content
             SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z");
             writer.println("From: " + senderEmail);
             writer.println("To: " + recipientEmail);
@@ -211,7 +200,7 @@ public class EmailService {
             writer.println("Date: " + dateFormat.format(new Date()));
             
             if (attachmentData != null && attachmentName != null) {
-                // 发送带附件的MIME邮件
+                // Send MIME email with attachment
                 String boundary = "----=_NextPart_" + System.currentTimeMillis();
                 writer.println("MIME-Version: 1.0");
                 writer.println("Content-Type: multipart/mixed; boundary=\"" + boundary + "\"");
@@ -219,7 +208,7 @@ public class EmailService {
                 writer.println("This is a multi-part message in MIME format.");
                 writer.println();
                 
-                // 文本部分
+                // Text part
                 writer.println("--" + boundary);
                 writer.println("Content-Type: text/plain; charset=UTF-8");
                 writer.println("Content-Transfer-Encoding: 8bit");
@@ -227,16 +216,16 @@ public class EmailService {
                 writer.println(content);
                 writer.println();
                 
-                // 附件部分
+                // Attachment part
                 writer.println("--" + boundary);
                 writer.println("Content-Type: application/pdf; name=\"" + attachmentName + "\"");
                 writer.println("Content-Transfer-Encoding: base64");
                 writer.println("Content-Disposition: attachment; filename=\"" + attachmentName + "\"");
                 writer.println();
                 
-                // Base64编码附件
+                // Base64 encode attachment
                 String encodedAttachment = Base64.getEncoder().encodeToString(attachmentData);
-                // 按每行76个字符分割base64数据
+                // Split base64 data into 76 characters per line
                 for (int i = 0; i < encodedAttachment.length(); i += 76) {
                     int end = Math.min(i + 76, encodedAttachment.length());
                     writer.println(encodedAttachment.substring(i, end));
@@ -244,7 +233,7 @@ public class EmailService {
                 writer.println();
                 writer.println("--" + boundary + "--");
             } else {
-                // 发送纯文本邮件
+                // Send plain text email
                 writer.println("Content-Type: text/plain; charset=UTF-8");
                 writer.println();
                 writer.println(content);
@@ -253,17 +242,17 @@ public class EmailService {
             
             response = reader.readLine();
             if (!response.startsWith("250")) {
-                throw new IOException("邮件发送失败: " + response);
+                throw new IOException("Email sending failed: " + response);
             }
             
-            // QUIT命令
+            // QUIT command
             writer.println("QUIT");
             response = reader.readLine();
             
             return true;
             
         } catch (Exception e) {
-            logger.log(Level.WARNING, "SMTP发送失败", e);
+            logger.log(Level.WARNING, "SMTP sending failed", e);
             return false;
         } finally {
             try {
@@ -271,12 +260,12 @@ public class EmailService {
                 if (writer != null) writer.close();
                 if (socket != null) socket.close();
             } catch (IOException e) {
-                logger.log(Level.WARNING, "关闭SMTP连接时出错", e);
+                logger.log(Level.WARNING, "Error closing SMTP connection", e);
             }
         }
     }
     
-    // 备用方法：如果SMTP失败，在控制台显示邮件内容
+    // Fallback method: If SMTP fails, display email content in console
     private void fallbackToConsoleDisplay(String recipientEmail, String subject, String content) {
         System.out.println("=== EMAIL (FALLBACK MODE) ===");
         System.out.println("To: " + recipientEmail);
@@ -297,7 +286,7 @@ public class EmailService {
             username, vehicleModel, dueDate
         );
         
-        return sendEmail(recipientEmail, subject, content);
+        return sendEmailWithAttachment(recipientEmail, subject, content, null, null);
     }
     
     public boolean sendOverdueNotification(String recipientEmail, String username, String vehicleModel, String dueDate) {
@@ -313,7 +302,7 @@ public class EmailService {
             username, vehicleModel, dueDate
         );
         
-        return sendEmail(recipientEmail, subject, content);
+        return sendEmailWithAttachment(recipientEmail, subject, content, null, null);
     }
     
     public boolean sendRentalConfirmation(String recipientEmail, String username, String vehicleModel, String startDate, String endDate, double totalFee) {
@@ -331,7 +320,7 @@ public class EmailService {
             username, vehicleModel, startDate, endDate, totalFee
         );
         
-        return sendEmail(recipientEmail, subject, content);
+        return sendEmailWithAttachment(recipientEmail, subject, content, null, null);
     }
     
     public boolean sendRentalApproval(String recipientEmail, String username, String vehicleModel) {
@@ -347,7 +336,7 @@ public class EmailService {
             username, vehicleModel
         );
         
-        return sendEmail(recipientEmail, subject, content);
+        return sendEmailWithAttachment(recipientEmail, subject, content, null, null);
     }
     
     public boolean sendRentalApprovalWithTicket(String recipientEmail, String username, String vehicleModel, String ticketId) {
@@ -368,7 +357,7 @@ public class EmailService {
             username, vehicleModel, ticketId, ticketId
         );
         
-        return sendEmail(recipientEmail, subject, content);
+        return sendEmailWithAttachment(recipientEmail, subject, content, null, null);
     }
     
     public boolean sendRentalApprovalWithPdfTicket(String recipientEmail, String username, String vehicleModel, String ticketId, byte[] pdfTicket) {
@@ -410,16 +399,16 @@ public class EmailService {
             username, vehicleModel, reason
         );
         
-        return sendEmail(recipientEmail, subject, content);
+        return sendEmailWithAttachment(recipientEmail, subject, content, null, null);
     }
     
-    // 测试邮件配置
+    // Test email configuration
     public boolean testEmailConfiguration() {
         try {
             String testSubject = "Test Email - Rental System SMTP";
             String testContent = "This is a test email to verify SMTP configuration.\n" +
             "If you receive this email, SMTP is working correctly!";
-            return sendEmail(senderEmail, testSubject, testContent);
+            return sendEmailWithAttachment(senderEmail, testSubject, testContent, null, null);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Email configuration test failed", e);
             return false;
@@ -436,7 +425,7 @@ public class EmailService {
         System.out.println("==========================");
     }
     
-    // 重新加载配置
+    // Reload configuration
     public void reloadConfiguration() {
         loadConfiguration();
         logger.info("SMTP configuration reloaded");

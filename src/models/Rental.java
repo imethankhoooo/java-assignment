@@ -1,4 +1,7 @@
+package models;  
 import java.time.LocalDate;
+
+import enums.RentalStatus;
 
 public class Rental {
     private int id;
@@ -7,12 +10,12 @@ public class Rental {
     private LocalDate startDate;
     private LocalDate endDate;
     private RentalStatus status;
-    private double totalFee; // 预计价格
-    private double actualFee; // 实际价格（还车时计算）
+    private double totalFee; // Estimated price
+    private double actualFee; // Actual price (calculated when returning)
     private boolean insuranceSelected;
-    private String username; // 关联的登录用户名
-    private boolean dueSoonReminderSent; // 归还前一天提醒是否已发送
-    private boolean overdueReminderSent; // 逾期提醒是否已发送
+    private String username; // Associated login username
+    private boolean dueSoonReminderSent; // Reminder sent before return
+    private boolean overdueReminderSent; // Overdue reminder sent
 
     public Rental(int id, Customer customer, Vehicle vehicle, LocalDate startDate, LocalDate endDate, 
                   RentalStatus status, double totalFee, boolean insuranceSelected, String username) {
@@ -23,7 +26,7 @@ public class Rental {
         this.endDate = endDate;
         this.status = status;
         this.totalFee = totalFee;
-        this.actualFee = 0.0; // 初始化为0，还车时计算
+        this.actualFee = 0.0; // Initialize to 0, calculated when returning
         this.insuranceSelected = insuranceSelected;
         this.username = username;
     }

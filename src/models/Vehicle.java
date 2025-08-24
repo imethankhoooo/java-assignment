@@ -1,4 +1,11 @@
+package models;
 import java.util.Map;
+
+import enums.FuelType;
+import enums.MaintenanceStatus;
+import enums.VehicleStatus;
+import enums.VehicleType;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
@@ -124,6 +131,35 @@ public class Vehicle {
     public void removeBooking(LocalDate startDate, LocalDate endDate) {
         schedule.removeIf(booking -> 
             booking.getStartDate().equals(startDate) && booking.getEndDate().equals(endDate));
+    }
+    
+    /**
+     * Check if vehicle has future bookings
+     */
+    public boolean hasFutureBookings() {
+        LocalDate today = LocalDate.now();
+        for (Booking booking : schedule) {
+            if (booking.getStartDate().isAfter(today) || booking.getStartDate().equals(today)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Get the next upcoming booking
+     */
+    public Booking getNextBooking() {
+        LocalDate today = LocalDate.now();
+        Booking nextBooking = null;
+        for (Booking booking : schedule) {
+            if (booking.getStartDate().isAfter(today) || booking.getStartDate().equals(today)) {
+                if (nextBooking == null || booking.getStartDate().isBefore(nextBooking.getStartDate())) {
+                    nextBooking = booking;
+                }
+            }
+        }
+        return nextBooking;
     }
     
     public void clearAllBookings() {

@@ -1,13 +1,16 @@
+package services;
 import java.util.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
+import enums.*;
+import models.*;
+
 /**
  * Service class for generating reports and exporting data
  */
 public class ReportService {
-    private static ReportExportService exportService = new ReportExportService();
     
     /**
      * Generate monthly rental statistics with export option

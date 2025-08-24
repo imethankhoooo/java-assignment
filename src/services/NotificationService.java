@@ -1,12 +1,18 @@
+package services;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+
+import enums.MessageType;
+import enums.RentalStatus;
+
 import java.util.HashMap;
+import models.*;
 
 public class NotificationService {
     private EmailService emailService;
     private MessageService messageService;
-    private Map<String, String> userEmails; // 用户邮箱映射
+    private Map<String, String> userEmails; // User email mapping
     
     public NotificationService() {
         this.emailService = new EmailService();
@@ -15,17 +21,16 @@ public class NotificationService {
         loadUserEmails();
     }
     
-    // 加载用户邮箱信息（实际应用中应从用户数据库获取）
     private void loadUserEmails() {
-        // 示例邮箱映射，实际应从用户系统获取
-        userEmails.put("admin", "admin@rental-system.com");
-        userEmails.put("user1", "user1@example.com");
-        userEmails.put("user2", "user2@example.com");
-        // 可以从配置文件或数据库加载更多用户邮箱
+        // Load user emails from AccountService when accounts are available
+        if (AccountService.getAccounts() != null && !AccountService.getAccounts().isEmpty()) {
+            loadUserEmailsFromAccounts(AccountService.getAccounts());
+        }
     }
     
-    // 从账户列表加载用户邮箱
+    // Load user emails from accounts
     public void loadUserEmailsFromAccounts(List<Account> accounts) {
+        userEmails.clear();
         for (Account account : accounts) {
             if (account.getEmail() != null && !account.getEmail().isEmpty()) {
                 userEmails.put(account.getUsername(), account.getEmail());
@@ -33,17 +38,17 @@ public class NotificationService {
         }
     }
     
-    // 设置用户邮箱
+    // Set user email
     public void setUserEmail(String username, String email) {
         userEmails.put(username, email);
     }
     
-    // 获取用户邮箱
+    // Get user email
     public String getUserEmail(String username) {
         return userEmails.get(username);
     }
     
-    // 发送租赁确认通知
+    // Send rental confirmation notification
     public boolean sendRentalConfirmation(String username, String vehicleModel, String startDate, String endDate, double totalFee) {
         String subject = "Rental Confirmation - " + vehicleModel;
         String content = String.format(
@@ -55,10 +60,10 @@ public class NotificationService {
             vehicleModel, startDate, endDate, totalFee
         );
         
-        // 发送系统消息
+        // Send system message
         messageService.sendMessage("system", username, subject, content, MessageType.RENTAL_CONFIRMATION);
         
-        // 发送邮件（如果用户有邮箱）
+        // Send email (if user has email)
         String email = getUserEmail(username);
         if (email != null) {
             return emailService.sendRentalConfirmation(email, username, vehicleModel, startDate, endDate, totalFee);
@@ -67,7 +72,7 @@ public class NotificationService {
         return true;
     }
     
-    // 发送租赁批准通知
+    // Send rental approval notification
     public boolean sendRentalApproval(String username, String vehicleModel, String rentalId) {
         String subject = "Rental Approved - " + vehicleModel;
         String content = String.format(
@@ -77,10 +82,10 @@ public class NotificationService {
             vehicleModel
         );
         
-        // 发送系统消息
+        // Send system message
         messageService.sendRentalMessage("admin", username, subject, content, MessageType.RENTAL_APPROVAL, rentalId);
         
-        // 发送邮件
+        // Send email
         String email = getUserEmail(username);
         if (email != null) {
             return emailService.sendRentalApproval(email, username, vehicleModel);
@@ -89,7 +94,7 @@ public class NotificationService {
         return true;
     }
     
-    // 发送租赁批准通知（带票据信息）
+    // Send rental approval notification (with ticket information)
     public boolean sendRentalApprovalWithTicket(String username, String vehicleModel, String rentalId, String ticketId) {
         String subject = "Rental Approved - Ticket Generated - " + vehicleModel;
         String content = String.format(
@@ -105,10 +110,10 @@ public class NotificationService {
             vehicleModel, ticketId, ticketId
         );
         
-        // 发送系统消息
+        // Send system message
         messageService.sendRentalMessage("admin", username, subject, content, MessageType.RENTAL_APPROVAL, rentalId);
         
-        // 发送邮件
+        // Send email
         String email = getUserEmail(username);
         if (email != null) {
             return emailService.sendRentalApprovalWithTicket(email, username, vehicleModel, ticketId);
@@ -117,7 +122,7 @@ public class NotificationService {
         return true;
     }
     
-    // 发送租赁批准通知（带PDF票据）
+    // Send rental approval notification (with PDF ticket)
     public boolean sendRentalApprovalWithPdfTicket(String username, String vehicleModel, String rentalId, String ticketId, byte[] pdfTicket) {
         String subject = "Rental Approved - PDF Ticket Attached - " + vehicleModel;
         String content = String.format(
@@ -134,10 +139,10 @@ public class NotificationService {
             vehicleModel, ticketId
         );
         
-        // 发送系统消息
+        // Send system message
         messageService.sendRentalMessage("admin", username, subject, content, MessageType.RENTAL_APPROVAL, rentalId);
         
-        // 发送带PDF附件的邮件
+        // Send email with PDF attachment
         String email = getUserEmail(username);
         if (email != null) {
             return emailService.sendRentalApprovalWithPdfTicket(email, username, vehicleModel, ticketId, pdfTicket);
@@ -146,7 +151,7 @@ public class NotificationService {
         return true;
     }
     
-    // 发送租赁拒绝通知
+    // Send rental rejection notification
     public boolean sendRentalRejection(String username, String vehicleModel, String reason, String rentalId) {
         String subject = "Rental Request Declined - " + vehicleModel;
         String content = String.format(
@@ -156,10 +161,10 @@ public class NotificationService {
             vehicleModel, reason
         );
         
-        // 发送系统消息
+        // Send system message
         messageService.sendRentalMessage("admin", username, subject, content, MessageType.RENTAL_REJECTION, rentalId);
         
-        // 发送邮件
+        // Send email
         String email = getUserEmail(username);
         if (email != null) {
             return emailService.sendRentalRejection(email, username, vehicleModel, reason);
@@ -168,7 +173,7 @@ public class NotificationService {
         return true;
     }
     
-    // 发送租赁提醒
+    // Send rental reminder
     public boolean sendRentalReminder(String username, String vehicleModel, String dueDate, String rentalId) {
         String subject = "Rental Reminder - " + vehicleModel;
         String content = String.format(
@@ -177,10 +182,10 @@ public class NotificationService {
             vehicleModel, dueDate
         );
         
-        // 发送系统消息
+        // Send system message
         messageService.sendRentalMessage("system", username, subject, content, MessageType.RENTAL_REMINDER, rentalId);
         
-        // 发送邮件
+        // Send email
         String email = getUserEmail(username);
         if (email != null) {
             return emailService.sendRentalReminder(email, username, vehicleModel, dueDate);
@@ -189,7 +194,7 @@ public class NotificationService {
         return true;
     }
     
-    // 发送逾期通知
+    // Send overdue notification
     public boolean sendOverdueNotification(String username, String vehicleModel, String dueDate, String rentalId) {
         String subject = "OVERDUE RENTAL - " + vehicleModel;
         String content = String.format(
@@ -199,10 +204,10 @@ public class NotificationService {
             vehicleModel, dueDate
         );
         
-        // 发送系统消息
+        // Send system message
         messageService.sendRentalMessage("system", username, subject, content, MessageType.OVERDUE_NOTIFICATION, rentalId);
         
-        // 发送邮件
+        // Send email
         String email = getUserEmail(username);
         if (email != null) {
             return emailService.sendOverdueNotification(email, username, vehicleModel, dueDate);
@@ -211,24 +216,24 @@ public class NotificationService {
         return true;
     }
     
-    // 发送管理员通知
+    // Send admin notification
     public boolean sendAdminNotification(String subject, String content) {
         messageService.sendMessage("system", "admin", subject, content, MessageType.ADMIN_NOTIFICATION);
         
         String adminEmail = getUserEmail("admin");
         if (adminEmail != null) {
-            return emailService.sendEmail(adminEmail, subject, content);
+            return emailService.sendEmailWithAttachment(adminEmail, subject, content, null, null);
         }
         
         return true;
     }
     
-    // 发送用户消息
+    // Send user message
     public boolean sendUserMessage(String fromUser, String toUser, String subject, String content) {
-        // 发送内部消息
+        // Send internal message
         boolean messageSuccess = messageService.sendMessage(fromUser, toUser, subject, content, MessageType.USER_MESSAGE);
         
-        // 同时发送邮件通知
+        // Send email notification
         String recipientEmail = getUserEmail(toUser);
         boolean emailSuccess = true;
         
@@ -245,21 +250,25 @@ public class NotificationService {
                 fromUser, subject, content
             );
             
-            emailSuccess = emailService.sendEmail(recipientEmail, emailSubject, emailContent);
+            emailSuccess = emailService.sendEmailWithAttachment(recipientEmail, emailSubject, emailContent, null, null);
             
             if (emailSuccess) {
                 System.out.println("Email notification sent to " + recipientEmail);
+                // Update the email sent status for the message
+                messageService.updateEmailSentStatus(fromUser, toUser, subject, true);
             } else {
                 System.out.println("Failed to send email notification to " + recipientEmail);
+                messageService.updateEmailSentStatus(fromUser, toUser, subject, false);
             }
         } else {
             System.out.println("No email address found for user: " + toUser);
+            messageService.updateEmailSentStatus(fromUser, toUser, subject, false);
         }
         
-        return messageSuccess; // 返回内部消息发送状态
+        return messageSuccess; // Return internal message send status
     }
     
-    // 检查并发送到期提醒
+    // Check and send overdue reminder
     public void checkAndSendReminders(List<Rental> rentals) {
         LocalDate today = LocalDate.now();
         LocalDate tomorrow = today.plusDays(1);
@@ -268,14 +277,14 @@ public class NotificationService {
             if (rental.getStatus() == RentalStatus.ACTIVE) {
                 LocalDate endDate = rental.getEndDate();
                 
-                // 发送明天到期提醒 (只发送一次)
+                // Send tomorrow overdue reminder (only send once)
                 if (endDate.equals(tomorrow) && !rental.isDueSoonReminderSent()) {
                     sendRentalReminder(rental.getUsername(), rental.getVehicle().getModel(), 
                                     rental.getEndDate().toString(), String.valueOf(rental.getId()));
                     rental.setDueSoonReminderSent(true);
                 }
                 
-                // 发送逾期通知 (只发送一次)
+                // Send overdue notification (only send once)
                 if (endDate.isBefore(today) && !rental.isOverdueReminderSent()) {
                     sendOverdueNotification(rental.getUsername(), rental.getVehicle().getModel(), 
                                           rental.getEndDate().toString(), String.valueOf(rental.getId()));
@@ -285,42 +294,42 @@ public class NotificationService {
         }
     }
     
-    // 获取用户消息
+    // Get user messages
     public List<Message> getUserMessages(String username) {
         return messageService.getMessagesByUser(username);
     }
     
-    // 获取未读消息
+    // Get unread messages
     public List<Message> getUnreadMessages(String username) {
         return messageService.getUnreadMessages(username);
     }
     
-    // 标记消息为已读
+    // Mark message as read
     public boolean markMessageAsRead(String messageId) {
         return messageService.markAsRead(messageId);
     }
     
-    // 删除消息
+    // Delete message
     public boolean deleteMessage(String messageId) {
         return messageService.deleteMessage(messageId);
     }
     
-    // 获取消息统计
+    // Get message statistics
     public Map<String, Integer> getMessageStats(String username) {
         return messageService.getMessageStats(username);
     }
     
-    // 测试邮件配置
+    // Test email configuration
     public boolean testEmailConfiguration() {
         return emailService.testEmailConfiguration();
     }
     
-    // 获取所有消息（管理员用）
+    // Get all messages (for admin)
     public List<Message> getAllMessages() {
         return messageService.getAllMessages();
     }
     
-    // 获取EmailService实例（用于配置管理）
+    // Get EmailService instance (for configuration management)
     public EmailService getEmailService() {
         return emailService;
     }

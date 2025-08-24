@@ -1,4 +1,8 @@
+package models;
 import java.time.LocalDateTime;
+
+import enums.MaintenanceLogType;
+import enums.MaintenanceStatus;
 
 public class MaintenanceLog {
     private static int nextId = 1;
@@ -11,9 +15,10 @@ public class MaintenanceLog {
     private LocalDateTime completedDate;
     private double cost;
     private MaintenanceStatus status;
-    private String reportedBy;  // 报告人（客户或管理员）
-    private String assignedTo;  // 分配给谁处理
-    private int severityLevel;  // 严重程度 (1-5, 5最严重)
+    private String reportedBy;  // Reported by (customer or admin)
+    private String assignedTo;  // Assigned to who
+    private String resolvedBy;  // Resolved by who
+    private int severityLevel;  // Severity (1-5, 5 most severe)
     
     public MaintenanceLog(int vehicleId, MaintenanceLogType logType, String description, 
                          String reportedBy, int severityLevel) {
@@ -33,7 +38,7 @@ public class MaintenanceLog {
     public void setId(int id) { this.id = id; }
     
     /**
-     * 设置下一个ID（用于从JSON加载时同步ID）
+     * Set next ID (for synchronization when loading from JSON)
      */
     public static void setNextId(int nextId) {
         MaintenanceLog.nextId = nextId;
@@ -67,6 +72,9 @@ public class MaintenanceLog {
     
     public String getAssignedTo() { return assignedTo; }
     public void setAssignedTo(String assignedTo) { this.assignedTo = assignedTo; }
+    
+    public String getResolvedBy() { return resolvedBy; }
+    public void setResolvedBy(String resolvedBy) { this.resolvedBy = resolvedBy; }
     
     public int getSeverityLevel() { return severityLevel; }
     public void setSeverityLevel(int severityLevel) { 

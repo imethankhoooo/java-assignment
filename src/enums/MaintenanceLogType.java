@@ -1,3 +1,4 @@
+package enums;
 public enum MaintenanceLogType {
     ROUTINE_MAINTENANCE,
     REPAIR,

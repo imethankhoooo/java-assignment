@@ -1,7 +1,8 @@
+package enums;
  
 
 /**
- * 账户角色枚举
+ * Account role enumeration
  */
 public enum AccountRole {
     ADMIN,

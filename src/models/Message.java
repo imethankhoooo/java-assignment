@@ -1,4 +1,7 @@
+package models;
 import java.time.LocalDateTime;
+
+import enums.MessageType;
 
 public class Message {
     private String id;

@@ -1,3 +1,4 @@
+package services;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Scanner;
@@ -38,9 +39,7 @@ public class InputHelper {
     }
     
     public boolean getConfirmation(String prompt) {
-        System.out.print(prompt);
-        String input = scanner.nextLine();
-        return input.equalsIgnoreCase("y");
+        return AccountService.getYesNoInput(scanner, prompt);
     }
 
     public LocalDate getDate(String prompt) {
