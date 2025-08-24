@@ -6,7 +6,7 @@
     "carPlate": "ABC-123",
     "vehicleType": "CAR",
     "fuelType": "PETROL",
-    "status": "RENTED",
+    "status": "AVAILABLE",
     "insuranceRate": 0.1,
     "basePrice": 50.0,
     "longTermDiscounts": {"7": 0.1, "14": 0.15, "30": 0.2}
