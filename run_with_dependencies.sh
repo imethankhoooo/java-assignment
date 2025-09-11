@@ -4,9 +4,9 @@ echo "Starting Java Vehicle Rental System with dependencies..."
 # Set classpath to include all JAR files in lib directory
 export CLASSPATH="src:lib/*"
 
-# Compile the Java files
+# Compile the Java files with UTF-8 encoding
 echo "Compiling Java files..."
-javac -cp "$CLASSPATH" -source 8 -target 8 src/*.java
+javac -encoding UTF-8 -cp "$CLASSPATH" -source 8 -target 8 src/*.java
 
 if [ $? -ne 0 ]; then
     echo "Compilation failed!"

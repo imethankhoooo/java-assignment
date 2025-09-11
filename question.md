@@ -1,0 +1,1 @@
+inheritance 3 class 1super 2sub 算？

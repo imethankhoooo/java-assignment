@@ -1,0 +1,38 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "Main",
+            "projectName": "java_589189f9"
+        },
+        {
+            "type": "java",
+            "name": "Launch Java Vehicle Rental System",
+            "request": "launch",
+            "mainClass": "main.Main",
+            "projectName": "java-vehicle-rental-system",
+            "classPaths": [
+                "${workspaceFolder}/.",
+                "${workspaceFolder}/lib/*"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "java",
+            "name": "Debug Java Vehicle Rental System",
+            "request": "launch",
+            "mainClass": "main.Main",
+            "projectName": "java-vehicle-rental-system",
+            "classPaths": [
+                "${workspaceFolder}/.",
+                "${workspaceFolder}/lib/*"
+            ],
+            "console": "integratedTerminal",
+            "args": []
+        }
+    ]
+}
+

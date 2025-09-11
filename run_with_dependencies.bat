@@ -10,17 +10,29 @@ if exist "%JAVA_HOME%\bin\javac.exe" (
 echo Starting Java Vehicle Rental System with dependencies...
 echo Compiling Java files...
 
-REM Use --release 8 to target Java 8 and handle bootstrap classes automatically
-%JAVAC_CMD% --release 8 -cp "lib/*;src" -d . src/*.java
+:: Build a temporary list of all .java files under src (recursively)
+if exist "%~dp0sources.txt" del "%~dp0sources.txt"
+for /R "%~dp0src" %%f in (*.java) do @echo %%f>>"%~dp0sources.txt"
+
+:: Check we found sources
+if not exist "%~dp0sources.txt" (
+    echo No Java source files found under src\
+    pause
+    exit /b 1
+)
+
+:: Compile using the sources list file with UTF-8 encoding
+%JAVAC_CMD% --release 8 -encoding UTF-8 -cp "lib/*;src" -d . @"%~dp0sources.txt"
 if %errorlevel% neq 0 (
     echo Compilation failed!
     pause
     exit /b
 )
+del "%~dp0sources.txt"
 echo Compilation successful!
 
 echo Starting application...
-java -cp "lib/*;." Main
+java -cp "lib/*;." main.Main
 if %errorlevel% neq 0 (
     pause
 ) 
