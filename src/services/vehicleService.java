@@ -22,6 +22,31 @@ public class vehicleService {
     private static List<Vehicle> vehicles = new ArrayList<Vehicle>();
     private static List<Rental> rentals = new ArrayList<>();
     
+    /**
+     * Capitalize first letter of each word
+     */
+    public static String capitalLetter(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            return input;
+        }
+        
+        String[] words = input.trim().split("\\s+");
+        StringBuilder result = new StringBuilder();
+        
+        for (int i = 0; i < words.length; i++) {
+            if (words[i].length() > 0) {
+                String word = words[i].toLowerCase();
+                word = word.substring(0, 1).toUpperCase() + word.substring(1);
+                result.append(word);
+                if (i < words.length - 1) {
+                    result.append(" ");
+                }
+            }
+        }
+        
+        return result.toString();
+    }
+    
     
     public static List<Vehicle> getVehicles() {
         return vehicles;
@@ -282,22 +307,179 @@ public class vehicleService {
         System.out.println("╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝\n");
     }
     public static void addNewVehicle(RentalSystem system, Scanner scanner) {
-        System.out.println("\n=== Add New Vehicle ===");
-        System.out.print("Enter vehicle ID: ");
-        int id = Integer.parseInt(scanner.nextLine());
+        while(true){
+            System.out.println("\nAdding New Vehicle...");
+            try{
+                System.out.print("Enter Vehicle ID     : "); 
+                String vehicleID = capitalLetter(scanner.nextLine().trim()); 
+                if (!vehicleID.matches("[A-Z]\\d{4}")) { // Example: F1001, S1001
+                    System.out.println("Error: Vehicle ID format must be 1 letter followed by 4 digits (e.g., F1001).");
+                    continue;
+                }
+
+                System.out.print("Enter Plate No       : "); // WMR1234
+                String plateNo = scanner.nextLine().toUpperCase().replaceAll("\\s+", ""); //all uppercase + remove spaces
+                if (!plateNo.matches("^[A-Z]{1,3}\\d{1,4}[A-Z]?$")) {
+                    System.out.println("Error: Invalid plate number format. Example: WA1234L, WMR1234, JBA1234");
+                    continue;
+                }
+
+                // check duplicate
+                boolean duplicate = false;
+
+                // go through each vehicle store in the list
+                for (Vehicle v : vehicles) {
+                    if (v.getVehicleID().equalsIgnoreCase(vehicleID)) {
+                        System.out.println("Error: Vehicle ID already exists.");
+                        duplicate = true;   
+                        break;
+                    }
+                    if (v.getPlateNo().equalsIgnoreCase(plateNo)) {
+                        System.out.println("Error: Plate number already exists.");
+                        duplicate = true;
+                        break;
+                    }
+                }
+
+                if (duplicate){
+                    System.out.print("Do you want to re-enter? (Y = re-enter / N = back to main menu): ");
+                    String response = scanner.nextLine();
+                    if (response.equalsIgnoreCase("Y")) {
+                        continue; // loop again to re-enter details
+                    } 
+                    else {
+                        System.out.println("Returning to main menu...");
+                        return; // exit add process
+                    }
+                }
+
+                System.out.print("Enter Car Brand      : "); // ToyoTa, Proton, ...
+                String carBrand = capitalLetter(scanner.nextLine().trim());
+                if (!carBrand.matches("[A-Za-z ]+")) {
+                    System.out.println("Error: Brand must contain only letters.");
+                    continue;
+                }
+                
+                System.out.print("Enter Car Model      : "); // Axia, Camry, ...
+                String carModel = capitalLetter(scanner.nextLine().trim());
+                if (!carModel.matches("[A-Za-z0-9 ]+")) { // allow letters+digits like X50
+                    System.out.println("Error: Model must contain only letters or numbers.");
+                    continue;
+                }
+
+                System.out.print("Enter Car Type       : "); // SUV, sedan, ...
+                String carType = capitalLetter(scanner.nextLine().trim());
+                if (!carType.matches("[A-Za-z ]+")) {
+                    System.out.println("Error: Type must contain only letters.");
+                    continue;
+                }
+
+                System.out.print("Enter Fuel Type      : ");
+                String fuelType = capitalLetter(scanner.nextLine().trim());
+                if (!fuelType.matches("[A-Za-z ]+")) {
+                    System.out.println("Error: Fuel Type must contain only letters.");
+                    continue;
+                }
+
+                System.out.print("Enter Color          : ");
+                String color = capitalLetter(scanner.nextLine().trim());
+                if (!color.matches("[A-Za-z ]+")) {
+                    System.out.println("Error: Color must contain only letters.");
+                    continue;
+                }
+
+                int purchaseYear;
+                try {
+                    System.out.print("Enter Purchase Year  : ");
+                    purchaseYear = Integer.parseInt(scanner.nextLine().trim());
+                    int currentYear = LocalDate.now().getYear();
+                    if (purchaseYear < 2000 || purchaseYear > currentYear) {
+                        System.out.println("Error: Year must be between 2000 and " + currentYear + ".");
+                        continue;
+                    }
+                } 
+                catch (NumberFormatException e) {
+                    System.out.println("Error: Enter a valid year (numbers only).");
+                    continue;
+                }
+
+                double capacity;
+                try {
+                    System.out.print("Enter Engine Capacity: ");
+                    capacity = Double.parseDouble(scanner.nextLine().trim());
+                    if (capacity <= 0) {
+                        System.out.println("Error: Capacity must be positive.");
+                        continue;
+                    }
+                } 
+                catch (NumberFormatException e) {
+                    System.out.println("Error: Enter a valid number for capacity.");
+                    continue;
+                }
+
+                System.out.print("Enter Condition (new/used): ");
+                String condition = capitalLetter(scanner.nextLine().trim());
+                if (!condition.equalsIgnoreCase("new") && !condition.equalsIgnoreCase("used")) {
+                    System.out.println("Error: Condition must be 'new' or 'used'.");
+                    continue;
+                }
+
+                double insuranceRate;
+                try {
+                    System.out.print("Enter Insurance Rate : ");
+                    insuranceRate = Double.parseDouble(scanner.nextLine().trim());
+                    if (insuranceRate < 0) {
+                        System.out.println("Error: Insurance rate must not be negative.");
+                        continue;
+                    }
+                } 
+                catch (NumberFormatException e) {
+                    System.out.println("Error: Enter a valid number for insurance rate.");
+                    continue;
+                }
+
+                System.out.print("Car Availability (available/rented): ");
+                String available = capitalLetter(scanner.nextLine().trim());
+                if (!available.equalsIgnoreCase("available") && !available.equalsIgnoreCase("rented")) {
+                    System.out.println("Error: Availability must be 'available' or 'rented'.");
+                    continue;
+                }
+                
+                double basePrice;
+                try {
+                    System.out.print("Enter Base Price Per Day: ");
+                    basePrice = Double.parseDouble(scanner.nextLine().trim());
+                    if (basePrice <= 0) {
+                        System.out.println("Error: Base price must be positive.");
+                        continue;
+                    }
+                } 
+                catch (NumberFormatException e) {
+                    System.out.println("Error: Enter a valid number for base price.");
+                    continue;
+                }
+                
+                // create new vehicle
+                Vehicle v = new Vehicle(vehicleID, plateNo, carBrand, carModel, carType, fuelType, color, purchaseYear, capacity, condition, insuranceRate, available, basePrice, null);
+                vehicles.add(v); // store data into list, +1 +1 ...
+                System.out.println("\nVehicle added successfully! ");
+                System.out.println(v);
+
+                // --- Ask if admin wants to add another vehicle ---
+                System.out.print("\nDo you want to add another vehicle? (Y = add another / N = back to main menu): ");
+                String again = scanner.nextLine();
+                if (!again.equalsIgnoreCase("Y")) {
+                    System.out.println("\nReturning to main menu..."); //if no or invalid input will go back main menu
+                    break; // exit while loop
+                }
+            }
+            catch (Exception e){
+                System.out.println("Error: " + e.getMessage());
+            }
+        }
         
-        System.out.print("Enter vehicle model: ");
-        String model = scanner.nextLine();
-        
-        System.out.print("Enter base price per day: ");
-        double basePrice = Double.parseDouble(scanner.nextLine());
-        
-        // Create new vehicle and add to system
-        Vehicle newVehicle = new Vehicle(String.valueOf(id), "UNKNOWN", "Default", model, "CAR", "PETROL", "UNKNOWN", 2020, 1.5, "GOOD", 0.1, "available", basePrice, null);
-        getVehicles().add(newVehicle);
-        
-        System.out.println("Vehicle added successfully!");
-        System.out.println("ID: " + id + ", Model: " + model + ", Price: RM" + basePrice + "/day");
+        // Save vehicles after adding
+        saveVehicles("vehicles.json");
     }
     
     // Manage vehicle status
@@ -308,9 +490,9 @@ public class vehicleService {
         
         displayAllVehicles();
         
-        System.out.print("\nEnter vehicle plate number to manage: ");
-        String plateNo = scanner.nextLine().trim();
-        Vehicle vehicle = findVehicleByPlateNo(plateNo);
+        System.out.print("\nEnter vehicle plate number or vehicle ID to manage: ");
+        String searchTerm = scanner.nextLine().trim();
+        Vehicle vehicle = findVehicleByPlateNo(searchTerm);
         
         if (vehicle == null) {
             System.out.println("Vehicle not found.");
@@ -361,9 +543,9 @@ public class vehicleService {
         
         displayAllVehicles();
         
-        System.out.print("\nEnter vehicle plate number to update: ");
-        String plateNo = scanner.nextLine().trim();
-        Vehicle vehicle = findVehicleByPlateNo(plateNo);
+        System.out.print("\nEnter vehicle plate number or vehicle ID to update: ");
+        String searchTerm = scanner.nextLine().trim();
+        Vehicle vehicle = findVehicleByPlateNo(searchTerm);
         
         if (vehicle == null) {
             System.out.println("Vehicle not found.");
@@ -469,9 +651,9 @@ public class vehicleService {
             System.out.println(v.toString());
         }
         
-        System.out.print("\nEnter vehicle plate number to archive: ");
-        String plateNo = scanner.nextLine().trim();
-        Vehicle vehicle = findVehicleByPlateNo(plateNo);
+        System.out.print("\nEnter vehicle plate number or vehicle ID to archive: ");
+        String searchTerm = scanner.nextLine().trim();
+        Vehicle vehicle = findVehicleByPlateNo(searchTerm);
         
         if (vehicle == null || vehicle.isArchived()) {
             System.out.println("Vehicle not found or already archived.");
@@ -534,9 +716,9 @@ public class vehicleService {
                     v.getVehicleID(), v.getPlateNo(), v.getBrand(), v.getModel());
         }
         
-        System.out.print("\nEnter vehicle plate number to restore: ");
-        String plateNo = scanner.nextLine().trim();
-        Vehicle vehicle = findVehicleByPlateNo(plateNo);
+        System.out.print("\nEnter vehicle plate number or vehicle ID to restore: ");
+        String searchTerm = scanner.nextLine().trim();
+        Vehicle vehicle = findVehicleByPlateNo(searchTerm);
         
         if (vehicle == null || !vehicle.isArchived()) {
             System.out.println("Vehicle not found or not archived.");
@@ -665,17 +847,29 @@ public class vehicleService {
     }
 
     /**
-     * Find vehicle by plate number (primary method)
+     * Find vehicle by plate number or vehicle ID (primary method)
      */
-    public static Vehicle findVehicleByPlateNo(String plateNo) {
-        if (plateNo == null || plateNo.trim().isEmpty()) {
+    public static Vehicle findVehicleByPlateNo(String searchTerm) {
+        if (searchTerm == null || searchTerm.trim().isEmpty()) {
             return null;
         }
+        
+        String trimmedSearch = searchTerm.trim();
+        
+        // First try to find by plate number
         for (Vehicle v : vehicles) {
-            if (v.getPlateNo().equalsIgnoreCase(plateNo.trim())) {
+            if (v.getPlateNo().equalsIgnoreCase(trimmedSearch)) {
                 return v;
             }
         }
+        
+        // If not found by plate number, try to find by vehicle ID
+        for (Vehicle v : vehicles) {
+            if (v.getVehicleID().equalsIgnoreCase(trimmedSearch)) {
+                return v;
+            }
+        }
+        
         return null;
     }
 
