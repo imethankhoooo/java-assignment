@@ -1,16 +1,14 @@
 package services;
 
-import java.util.Scanner;
-import java.util.List;
-import java.util.ArrayList;
-
 import enums.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 import models.*;
-
 import static services.UtilityService.*;
 
 public class AdminService extends AccountService {
-    
+
     /**
      * Get all admin accounts
      */
@@ -23,14 +21,14 @@ public class AdminService extends AccountService {
         }
         return admins;
     }
-    
+
     /**
      * Admin user management interface
      */
     public static void manageUsers(Scanner scanner) {
         adminUserManagement(scanner);
     }
-    
+
     /**
      * Admin vehicle management interface
      */
@@ -49,7 +47,7 @@ public class AdminService extends AccountService {
             System.out.println("║ 0. Back to Admin Menu                                           ║");
             System.out.println("╚══════════════════════════════════════════════════════════════════╝");
             System.out.print("Select option: ");
-            
+
             String choice = scanner.nextLine();
             switch (choice) {
                 case "1":
@@ -84,8 +82,7 @@ public class AdminService extends AccountService {
             }
         }
     }
-    
-    
+
     /**
      * Search vehicles (admin function)
      */
@@ -93,25 +90,25 @@ public class AdminService extends AccountService {
         System.out.println("\n=== VEHICLE SEARCH ===");
         System.out.print("Enter search term (brand, model, plate, or leave empty for all): ");
         String searchTerm = scanner.nextLine().trim();
-        
+
         List<Vehicle> results;
         if (searchTerm.isEmpty()) {
             results = vehicleService.getVehicles();
         } else {
             results = vehicleService.performSearch(vehicleService.getVehicles(), searchTerm);
         }
-        
+
         if (results.isEmpty()) {
             System.out.println("No vehicles found matching your search.");
         } else {
             System.out.printf("\nFound %d vehicle(s):%n", results.size());
             vehicleService.displaySearchResults(results);
         }
-        
+
         System.out.println("Press Enter to continue...");
         scanner.nextLine();
     }
-    
+
     /**
      * Admin business operations interface
      */
@@ -127,7 +124,7 @@ public class AdminService extends AccountService {
             System.out.println("║ 0. Back to Admin Menu                                           ║");
             System.out.println("╚══════════════════════════════════════════════════════════════════╝");
             System.out.print("Select option: ");
-            
+
             String choice = scanner.nextLine();
             switch (choice) {
                 case "1":
@@ -157,48 +154,48 @@ public class AdminService extends AccountService {
             }
         }
     }
-    
+
     /**
      * View business reports
      */
     private static void viewBusinessReports() {
         System.out.println("\n=== BUSINESS REPORTS ===");
-        
+
         // Vehicle statistics
         List<Vehicle> allVehicles = vehicleService.getVehicles();
         long totalVehicles = allVehicles.size();
         long availableVehicles = allVehicles.stream()
-            .filter(v -> "available".equalsIgnoreCase(v.getStatus()))
-            .count();
+                .filter(v -> "available".equalsIgnoreCase(v.getStatus()))
+                .count();
         long rentedVehicles = allVehicles.stream()
-            .filter(v -> "rented".equalsIgnoreCase(v.getStatus()))
-            .count();
+                .filter(v -> "rented".equalsIgnoreCase(v.getStatus()))
+                .count();
         long outOfServiceVehicles = allVehicles.stream()
-            .filter(v -> "out_of_service".equalsIgnoreCase(v.getStatus()))
-            .count();
-        
+                .filter(v -> "out_of_service".equalsIgnoreCase(v.getStatus()))
+                .count();
+
         System.out.println("Vehicle Statistics:");
         System.out.printf("  Total Vehicles: %d%n", totalVehicles);
         System.out.printf("  Available: %d%n", availableVehicles);
         System.out.printf("  Rented: %d%n", rentedVehicles);
         System.out.printf("  Out of Service: %d%n", outOfServiceVehicles);
-        
+
         // Account statistics
         List<Account> allAccounts = getAccounts();
         long totalAccounts = allAccounts.size();
         long customerAccounts = allAccounts.stream()
-            .filter(a -> a.getRole() == AccountRole.CUSTOMER)
-            .count();
+                .filter(a -> a.getRole() == AccountRole.CUSTOMER)
+                .count();
         long adminAccounts = allAccounts.stream()
-            .filter(a -> a.getRole() == AccountRole.ADMIN)
-            .count();
-        
+                .filter(a -> a.getRole() == AccountRole.ADMIN)
+                .count();
+
         System.out.println("\nAccount Statistics:");
         System.out.printf("  Total Accounts: %d%n", totalAccounts);
         System.out.printf("  Customers: %d%n", customerAccounts);
         System.out.printf("  Administrators: %d%n", adminAccounts);
     }
-    
+
     /**
      * Export reports
      */
@@ -209,7 +206,7 @@ public class AdminService extends AccountService {
         System.out.println("3. Export Rental Report");
         System.out.println("0. Cancel");
         System.out.print("Select report type: ");
-        
+
         String choice = scanner.nextLine();
         switch (choice) {
             case "1":
@@ -226,11 +223,11 @@ public class AdminService extends AccountService {
             default:
                 System.out.println("Invalid option.");
         }
-        
+
         System.out.println("Press Enter to continue...");
         scanner.nextLine();
     }
-    
+
     /**
      * Show system statistics
      */
@@ -238,7 +235,7 @@ public class AdminService extends AccountService {
         System.out.println("\n=== SYSTEM STATISTICS ===");
         System.out.println("Detailed system statistics functionality coming soon...");
     }
-    
+
     /**
      * Analyze revenue
      */
@@ -246,20 +243,17 @@ public class AdminService extends AccountService {
         System.out.println("\n=== REVENUE ANALYSIS ===");
         System.out.println("Revenue analysis functionality coming soon...");
     }
-    
-    /**
-     * Admin profile management
-     */
+
     public static void manageAdminProfile(Scanner scanner, Account adminAccount) {
         if (adminAccount.getRole() != AccountRole.ADMIN) {
             System.out.println("This function is only for admin accounts.");
             return;
         }
-        
+
         while (true) {
             clearScreen();
             System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
-            System.out.println("║                     ADMIN PROFILE                                ║");
+            System.out.println("║                           ADMIN PROFILE                          ║");
             System.out.println("╠══════════════════════════════════════════════════════════════════╣");
             System.out.println("║ 1. View Profile Information                                      ║");
             System.out.println("║ 2. Update Profile Information                                    ║");
@@ -268,7 +262,7 @@ public class AdminService extends AccountService {
             System.out.println("║ 0. Back                                                          ║");
             System.out.println("╚══════════════════════════════════════════════════════════════════╝");
             System.out.print("Select option: ");
-            
+
             String choice = scanner.nextLine();
             switch (choice) {
                 case "1":
@@ -295,20 +289,23 @@ public class AdminService extends AccountService {
             }
         }
     }
-    
-    /**
-     * Display admin profile information
-     */
+
     private static void displayAdminProfile(Account adminAccount) {
-        System.out.println("\n=== ADMIN PROFILE ===");
-        System.out.println("Username: " + adminAccount.getUsername());
+        System.out.println("\n");
+        System.out.println("==========================================");
+        System.out.println("              ADMIN PROFILE           ");
+        System.out.println("==========================================");
+
+        System.out.printf("%-20s : %s\n", "Username", adminAccount.getUsername());
+
         if (adminAccount instanceof Admin) {
             Admin admin = (Admin) adminAccount;
-            System.out.println("Admin ID: " + admin.getAdminId());
+            System.out.printf("%-20s : %s\n", "Admin ID", admin.getAdminId());
         }
-        System.out.println("Full Name: " + adminAccount.getFullName());
-        System.out.println("Email: " + adminAccount.getEmail());
-        System.out.println("Contact Number: " + adminAccount.getContactNumber());
-        System.out.println("Role: " + adminAccount.getRole());
+
+        System.out.printf("%-20s : %s\n", "Full Name", adminAccount.getFullName());
+        System.out.printf("%-20s : %s\n", "Email", adminAccount.getEmail());
+        System.out.printf("%-20s : %s\n", "Contact Number", adminAccount.getContactNumber());
+        System.out.printf("%-20s : %s\n", "Role", adminAccount.getRole());
     }
 }

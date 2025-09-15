@@ -1,26 +1,25 @@
 package services;
 
-import java.util.Scanner;
-import java.util.List;
-import java.util.ArrayList;
-import java.io.*;
-
 import enums.*;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 import models.*;
-
 import static services.UtilityService.*;
 
 public class AccountService {
+
     private static List<Account> accounts = new ArrayList<>();
-    
+
     public static List<Account> getAccounts() {
         return accounts;
     }
-    
+
     public static void setAccounts(List<Account> accountList) {
         accounts = accountList;
     }
-    
+
     public static Account getAccountByUsername(String username) {
         for (Account account : accounts) {
             if (account.getUsername().equals(username)) {
@@ -29,7 +28,7 @@ public class AccountService {
         }
         return null;
     }
-    
+
     public static boolean addAccount(Account account) {
         if (getAccountByUsername(account.getUsername()) == null) {
             accounts.add(account);
@@ -37,7 +36,7 @@ public class AccountService {
         }
         return false;
     }
-    
+
     public static boolean updateAccount(String username, Account updatedAccount) {
         for (int i = 0; i < accounts.size(); i++) {
             if (accounts.get(i).getUsername().equals(username)) {
@@ -47,21 +46,20 @@ public class AccountService {
         }
         return false;
     }
-    
+
     public static boolean deleteAccount(String username) {
         return accounts.removeIf(account -> account.getUsername().equals(username));
     }
-    
+
     public static Account login(String username, String password) {
         for (Account account : accounts) {
-            if (account.getUsername().equals(username) && 
-                verifyPassword(password, account.getPassword())) {
+            if (account.getUsername().equals(username) && account.validateCredentials(password)) {
                 return account;
             }
         }
         return null;
     }
-    
+
     public static boolean updatePassword(String username, String hashedPassword) {
         Account account = getAccountByUsername(username);
         if (account != null) {
@@ -70,41 +68,41 @@ public class AccountService {
         }
         return false;
     }
-    
+
     public static List<Account> searchAccounts(String searchTerm, AccountRole filterRole) {
         List<Account> results = new ArrayList<>();
         String lowerSearchTerm = searchTerm != null ? searchTerm.toLowerCase() : "";
-        
+
         for (Account account : accounts) {
             if (filterRole != null && account.getRole() != filterRole) {
                 continue;
             }
-            
+
             boolean matches = false;
-            
+
             if (searchTerm == null || searchTerm.isEmpty()) {
                 matches = true;
             } else {
                 // Standard field searches
-                matches = account.getUsername().toLowerCase().contains(lowerSearchTerm) ||
-                         account.getFullName().toLowerCase().contains(lowerSearchTerm) ||
-                         account.getEmail().toLowerCase().contains(lowerSearchTerm) ||
-                         account.getContactNumber().contains(searchTerm);
-                
+                matches = account.getUsername().toLowerCase().contains(lowerSearchTerm)
+                        || account.getFullName().toLowerCase().contains(lowerSearchTerm)
+                        || account.getEmail().toLowerCase().contains(lowerSearchTerm)
+                        || account.getContactNumber().contains(searchTerm);
+
                 // Admin ID search
                 if (!matches && account instanceof Admin) {
                     Admin admin = (Admin) account;
                     matches = admin.getAdminId().toLowerCase().contains(lowerSearchTerm);
                 }
             }
-            
+
             if (matches) {
                 results.add(account);
             }
         }
         return results;
     }
-    
+
     // Load account data from JSON file
     public static void loadAccounts(String filename) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
@@ -113,7 +111,7 @@ public class AccountService {
             while ((line = reader.readLine()) != null) {
                 jsonContent.append(line);
             }
-            
+
             accounts = parseAccountsFromJson(jsonContent.toString());
             if (accounts == null) {
                 accounts = new ArrayList<>();
@@ -124,7 +122,7 @@ public class AccountService {
             accounts = new ArrayList<>();
         }
     }
-    
+
     // Save account data to JSON file
     public static void saveAccounts(String filename) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
@@ -134,7 +132,7 @@ public class AccountService {
             System.out.println("Failed to save account data: " + e.getMessage());
         }
     }
-    
+
     // Parse account JSON data
     private static List<Account> parseAccountsFromJson(String json) {
         List<Account> accountList = new ArrayList<>();
@@ -142,9 +140,9 @@ public class AccountService {
             json = json.trim();
             if (json.startsWith("[") && json.endsWith("]")) {
                 json = json.substring(1, json.length() - 1);
-                
+
                 String[] accountObjects = splitJsonObjects(json);
-                
+
                 for (String accountJson : accountObjects) {
                     Account account = parseAccountFromJson(accountJson.trim());
                     if (account != null) {
@@ -157,7 +155,7 @@ public class AccountService {
         }
         return accountList;
     }
-    
+
     // Parse single account object
     // Note: 为了向后兼容性，继续提取所有字段，但根据账户类型只使用相关字段
     private static Account parseAccountFromJson(String json) {
@@ -209,7 +207,7 @@ public class AccountService {
         }
         return null;
     }
-    
+
     // Convert account data to JSON format
     private static String convertAccountsToJson() {
         StringBuilder json = new StringBuilder();
@@ -224,7 +222,7 @@ public class AccountService {
             json.append("    \"email\": \"").append(escapeJson(account.getEmail())).append("\",\n");
             json.append("    \"fullName\": \"").append(escapeJson(account.getFullName())).append("\",\n");
             json.append("    \"contactNumber\": \"").append(escapeJson(account.getContactNumber())).append("\"");
-            
+
             // Add role-specific fields
             if (account instanceof Customer) {
                 Customer customer = (Customer) account;
@@ -238,7 +236,7 @@ public class AccountService {
                 json.append(",\n");
                 json.append("    \"adminId\": \"").append(escapeJson(admin.getAdminId())).append("\"\n");
             }
-            
+
             json.append("  }");
 
             if (i < accounts.size() - 1) {
@@ -254,6 +252,7 @@ public class AccountService {
 
     /**
      * Add new account with notification service update
+     *
      * @param account Account to add
      * @return true if added successfully, false if username already exists
      */
@@ -275,6 +274,7 @@ public class AccountService {
 
     /**
      * Update existing account with notification service update
+     *
      * @param username Username of account to update
      * @param updatedAccount Updated account information
      * @return true if updated successfully, false if account not found
@@ -289,7 +289,7 @@ public class AccountService {
         existingAccount.setEmail(updatedAccount.getEmail());
         existingAccount.setFullName(updatedAccount.getFullName());
         existingAccount.setContactNumber(updatedAccount.getContactNumber());
-        
+
         // Update customer-specific fields only if both are Customer instances
         if (existingAccount instanceof Customer && updatedAccount instanceof Customer) {
             Customer existingCustomer = (Customer) existingAccount;
@@ -313,6 +313,7 @@ public class AccountService {
 
     /**
      * Delete account with notification service update
+     *
      * @param username Username of account to delete
      * @return true if deleted successfully, false if account not found
      */
@@ -339,6 +340,7 @@ public class AccountService {
 
     /**
      * Search accounts by role and search term
+     *
      * @param searchTerm Search term (can be null for all accounts)
      * @param role Account role filter (can be null for all roles)
      * @return List of accounts matching the search criteria
@@ -353,22 +355,22 @@ public class AccountService {
             }
 
             boolean matches = false;
-            
+
             if (searchLower.isEmpty()) {
                 matches = true;
             } else {
-                matches = account.getUsername().toLowerCase().contains(searchLower) ||
-                         (account.getFullName() != null && account.getFullName().toLowerCase().contains(searchLower)) ||
-                         (account.getContactNumber() != null && account.getContactNumber().contains(searchTerm)) ||
-                         (account.getEmail() != null && account.getEmail().toLowerCase().contains(searchLower));
-                
+                matches = account.getUsername().toLowerCase().contains(searchLower)
+                        || (account.getFullName() != null && account.getFullName().toLowerCase().contains(searchLower))
+                        || (account.getContactNumber() != null && account.getContactNumber().contains(searchTerm))
+                        || (account.getEmail() != null && account.getEmail().toLowerCase().contains(searchLower));
+
                 // Admin ID search
                 if (!matches && account instanceof Admin) {
                     Admin admin = (Admin) account;
                     matches = admin.getAdminId().toLowerCase().contains(searchLower);
                 }
             }
-            
+
             if (matches) {
                 results.add(account);
             }
@@ -378,6 +380,7 @@ public class AccountService {
 
     /**
      * Get all accounts by role
+     *
      * @param role Account role to filter by
      * @return List of accounts with the specified role
      */
@@ -393,6 +396,7 @@ public class AccountService {
 
     /**
      * Search customer accounts by search term
+     *
      * @param searchTerm Search term (can be null for all customers)
      * @return List of customer accounts matching the search criteria
      */
@@ -411,9 +415,9 @@ public class AccountService {
         String searchLower = searchTerm.toLowerCase().trim();
         for (Account account : accounts) {
             if (account.getRole() == AccountRole.CUSTOMER) {
-                if (account.getUsername().toLowerCase().contains(searchLower) ||
-                        (account.getFullName() != null && account.getFullName().toLowerCase().contains(searchLower)) ||
-                        (account.getContactNumber() != null && account.getContactNumber().contains(searchTerm))) {
+                if (account.getUsername().toLowerCase().contains(searchLower)
+                        || (account.getFullName() != null && account.getFullName().toLowerCase().contains(searchLower))
+                        || (account.getContactNumber() != null && account.getContactNumber().contains(searchTerm))) {
                     results.add(account);
                 }
             }
@@ -421,21 +425,27 @@ public class AccountService {
         return results;
     }
 
-     /**
+    /**
      * Handle login process
      */
     public static Account loginProcess(Scanner scanner) {
         System.out.println("\n=== LOGIN ===");
-        System.out.print("Enter username: ");
-        String username = scanner.nextLine();
-        System.out.print("Enter password: ");
-        String password = scanner.nextLine();
-        
-        Account account = login(username, password);
-        if (account == null) {
-            System.out.println("Invalid username or password. Please try again.");
+        while (true) {
+            System.out.print("Enter username: ");
+            String username = scanner.nextLine();
+            System.out.print("Enter password: ");
+            String password = scanner.nextLine();
+
+            Account account = login(username, password);
+            if (account == null) {
+                System.out.println("Invalid username or password. Please try again.");
+                if (!getYesNoInput(scanner, "Try again?")) {
+                    return null;
+                }
+                continue;
+            }
+            return account;
         }
-        return account;
     }
 
     /**
@@ -445,10 +455,10 @@ public class AccountService {
         System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
         System.out.println("║                        USER REGISTRATION                         ║");
         System.out.println("╚══════════════════════════════════════════════════════════════════╝");
-        
+
         // Step 1: Basic account information
         System.out.println("\n=== Step 1: Basic Account Information ===");
-        
+
         String username;
         while (true) {
             System.out.print("Username: ");
@@ -463,21 +473,25 @@ public class AccountService {
             }
             break;
         }
-        
+
         String password;
         while (true) {
             System.out.print("Password: ");
             password = scanner.nextLine();
-            if (password.length() < 4) {
-                System.out.println("Password must be at least 4 characters long.");
+            if (password.length() < 8) {
+                System.out.println("Password must be at least 8 characters and contain letters and digits.");
+                continue;
+            }
+            if (!password.matches("(?=.*[A-Za-z])(?=.*\\d).+")) {
+                System.out.println("Password must contain at least one letter and one digit.");
                 continue;
             }
             break;
         }
-        
+
         // Hash the password
         password = hashPassword(password);
-        
+
         String email;
         while (true) {
             System.out.print("Email: ");
@@ -488,18 +502,25 @@ public class AccountService {
             }
             break;
         }
-        
+
         // Step 2: Personal Information
         System.out.println("\n=== Step 2: Personal Information ===");
-        
-        System.out.print("Full Name: ");
-        String fullName = scanner.nextLine().trim();
-        while (fullName.isEmpty()) {
-            System.out.println("Full name is required.");
+
+        String fullName;
+        while (true) {
             System.out.print("Full Name: ");
             fullName = scanner.nextLine().trim();
+            if (fullName.isEmpty()) {
+                System.out.println("Full name is required.");
+                continue;
+            }
+            if (!isValidFullName(fullName)) {
+                System.out.println("Full name can only contain letters, spaces, dots, apostrophes, and hyphens.");
+                continue;
+            }
+            break;
         }
-        
+
         String contactNumber;
         while (true) {
             System.out.print("Contact Number (60xxxxxxxxx): ");
@@ -510,15 +531,18 @@ public class AccountService {
             }
             break;
         }
-        
-        System.out.print("Address: ");
-        String address = scanner.nextLine().trim();
-        while (address.isEmpty()) {
-            System.out.println("Address is required.");
+
+        String address;
+        while (true) {
             System.out.print("Address: ");
             address = scanner.nextLine().trim();
+            if (address.isEmpty()) {
+                System.out.println("Address is required.");
+                continue;
+            }
+            break;
         }
-        
+
         String licenseNumber;
         String dateOfBirth;
         while (true) {
@@ -528,42 +552,42 @@ public class AccountService {
                 System.out.println("Please enter a valid IC number in format: xxxxxx-xx-xxxx");
                 continue;
             }
-            
+
             // Extract date of birth from IC
             dateOfBirth = extractDateOfBirthFromIC(licenseNumber);
             if (dateOfBirth == null) {
                 System.out.println("Invalid IC number format. Cannot extract date of birth.");
                 continue;
             }
-            
+
             System.out.println("Date of birth extracted from IC: " + dateOfBirth);
             if (getYesNoInput(scanner, "Is this correct?")) {
                 break;
             }
         }
-        
+
         System.out.print("Emergency Contact Number (optional): ");
         String emergencyContact = scanner.nextLine().trim();
-        
+
         // Step 3: Email Verification
         System.out.println("\n=== Step 3: Email Verification ===");
         String verificationCode = generateVerificationCode();
-        
+
         if (!sendEmailVerification(email, verificationCode)) {
             System.out.println("Failed to send verification email. Registration cancelled.");
             return;
         }
-        
+
         if (!verifyEmailCode(scanner, verificationCode, email)) {
             System.out.println("Email verification failed. Registration cancelled.");
             return;
         }
-        
+
         // Create and save account
-        Customer newAccount = new Customer(username, password, email, fullName, 
-                                         contactNumber, address, dateOfBirth, 
-                                         licenseNumber, emergencyContact);
-        
+        Customer newAccount = new Customer(username, password, email, fullName,
+                contactNumber, address, dateOfBirth,
+                licenseNumber, emergencyContact);
+
         if (addAccount(newAccount)) {
             saveAccounts("accounts.json");
             System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
@@ -573,7 +597,7 @@ public class AccountService {
         } else {
             System.out.println("Registration failed. Please try again.");
         }
-        
+
         System.out.println("\nPress Enter to continue...");
         scanner.nextLine();
     }
@@ -582,10 +606,10 @@ public class AccountService {
      * Validate email format
      */
     public static boolean isValidEmail(String email) {
-        return email != null && email.contains("@") && email.contains(".") && 
-               email.indexOf("@") < email.lastIndexOf(".");
+        return email != null && email.contains("@") && email.contains(".")
+                && email.indexOf("@") < email.lastIndexOf(".");
     }
-    
+
     /**
      * Validate full name format (only letters and spaces)
      */
@@ -593,27 +617,29 @@ public class AccountService {
         if (fullName == null || fullName.trim().isEmpty()) {
             return false;
         }
-        
+
         // Only allow letters, spaces, dots, apostrophes, and hyphens
         String namePattern = "^[a-zA-Z\\s.'\\-]+$";
         return fullName.matches(namePattern);
     }
-    
+
     /**
      * Clean and validate full name input
      */
     public static String cleanAndValidateFullName(String input) {
-        if (input == null) return null;
-        
+        if (input == null) {
+            return null;
+        }
+
         // Trim whitespace
         String cleaned = input.trim();
-        
+
         // Remove extra spaces between words
         cleaned = cleaned.replaceAll("\\s+", " ");
-        
+
         return cleaned;
     }
-    
+
     /**
      * Get validated Y/N input from user
      */
@@ -621,7 +647,7 @@ public class AccountService {
         while (true) {
             System.out.print(prompt + " (Y/N): ");
             String input = scanner.nextLine().trim();
-            
+
             if (input.equalsIgnoreCase("Y") || input.equalsIgnoreCase("Yes")) {
                 return true;
             } else if (input.equalsIgnoreCase("N") || input.equalsIgnoreCase("No")) {
@@ -639,7 +665,7 @@ public class AccountService {
         if (contactNumber == null || !contactNumber.startsWith("60")) {
             return false;
         }
-        
+
         // Remove any non-digit characters for length check
         String digitsOnly = contactNumber.replaceAll("\\D", "");
         return digitsOnly.length() >= 11 && digitsOnly.length() <= 13;
@@ -649,8 +675,10 @@ public class AccountService {
      * Validate IC/License number format (xxxxxx-xx-xxxx)
      */
     public static boolean isValidLicenseNumber(String licenseNumber) {
-        if (licenseNumber == null) return false;
-        
+        if (licenseNumber == null) {
+            return false;
+        }
+
         // Check format: 6 digits - 2 digits - 4 digits
         String pattern = "\\d{6}-\\d{2}-\\d{4}";
         return licenseNumber.matches(pattern);
@@ -664,26 +692,26 @@ public class AccountService {
             if (!isValidLicenseNumber(licenseNumber)) {
                 return null;
             }
-            
+
             String[] parts = licenseNumber.split("-");
             String datePart = parts[0]; // yymmdd
-            
+
             String yearStr = datePart.substring(0, 2);
             String monthStr = datePart.substring(2, 4);
             String dayStr = datePart.substring(4, 6);
-            
+
             int year = Integer.parseInt(yearStr);
             int month = Integer.parseInt(monthStr);
             int day = Integer.parseInt(dayStr);
-            
+
             // Validate month and day
             if (month < 1 || month > 12 || day < 1 || day > 31) {
                 return null;
             }
-            
+
             // Determine century (if > 25, assume 19xx, else 20xx)
             int fullYear = year > 25 ? 1900 + year : 2000 + year;
-            
+
             return String.format("%04d-%02d-%02d", fullYear, month, day);
         } catch (Exception e) {
             return null;
@@ -694,8 +722,9 @@ public class AccountService {
      * Generate 6-digit verification code
      */
     public static String generateVerificationCode() {
-        return String.format("%06d", (int)(Math.random() * 1000000));
+        return String.format("%06d", (int) (Math.random() * 1000000));
     }
+
     /**
      * Hash password using simple hash function
      */
@@ -704,7 +733,7 @@ public class AccountService {
             java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
             byte[] hash = md.digest(password.getBytes("UTF-8"));
             StringBuilder hexString = new StringBuilder();
-            
+
             for (byte b : hash) {
                 String hex = Integer.toHexString(0xff & b);
                 if (hex.length() == 1) {
@@ -712,7 +741,7 @@ public class AccountService {
                 }
                 hexString.append(hex);
             }
-            
+
             return hexString.toString();
         } catch (Exception e) {
             // Fallback to simple hash if SHA-256 is not available
@@ -734,13 +763,13 @@ public class AccountService {
         EmailService emailService = new EmailService();
         String subject = "Vehicle Rental System - Email Verification";
         String content = String.format(
-            "Welcome to Vehicle Rental System!\n\n" +
-            "Your verification code is: %s\n\n" +
-            "Please enter this code to complete your registration.\n\n" +
-            "This code will expire in 10 minutes.\n\n" +
-            "Best regards,\n" +
-            "Vehicle Rental System Team", code);
-        
+                "Welcome to Vehicle Rental System!\n\n"
+                + "Your verification code is: %s\n\n"
+                + "Please enter this code to complete your registration.\n\n"
+                + "This code will expire in 10 minutes.\n\n"
+                + "Best regards,\n"
+                + "Vehicle Rental System Team", code);
+
         return emailService.sendEmailWithAttachment(email, subject, content, null, null);
     }
 
@@ -753,22 +782,22 @@ public class AccountService {
         long lastSendTime = System.currentTimeMillis();
         int maxAttempts = 3;
         int attempts = 0;
-        
+
         while (attempts < maxAttempts) {
             System.out.println("Verification email sent to: " + currentEmail);
             System.out.print("Enter verification code (or type 'resend' to resend, 'change' to change email): ");
             String input = scanner.nextLine().trim();
-            
+
             if (input.equalsIgnoreCase("resend")) {
                 long currentTime = System.currentTimeMillis();
                 long timeSinceLastSend = (currentTime - lastSendTime) / 1000;
-                
+
                 if (timeSinceLastSend < 30) {
                     long waitTime = 30 - timeSinceLastSend;
                     System.out.println("Please wait " + waitTime + " seconds before requesting another code.");
                     continue;
                 }
-                
+
                 currentCode = generateVerificationCode();
                 if (sendEmailVerification(currentEmail, currentCode)) {
                     lastSendTime = currentTime;
@@ -778,17 +807,17 @@ public class AccountService {
                 }
                 continue;
             }
-            
+
             if (input.equalsIgnoreCase("change")) {
                 System.out.println("Current email: " + currentEmail);
                 System.out.print("Enter new email address: ");
                 String newEmail = scanner.nextLine().trim();
-                
+
                 if (!isValidEmail(newEmail)) {
                     System.out.println("Invalid email format. Please try again.");
                     continue;
                 }
-                
+
                 currentEmail = newEmail;
                 currentCode = generateVerificationCode();
                 if (sendEmailVerification(currentEmail, currentCode)) {
@@ -799,7 +828,7 @@ public class AccountService {
                 }
                 continue;
             }
-            
+
             if (input.equals(currentCode)) {
                 System.out.println("Email verification successful!");
                 return true;
@@ -808,7 +837,7 @@ public class AccountService {
                 System.out.println("Invalid verification code. " + (maxAttempts - attempts) + " attempts remaining.");
             }
         }
-        
+
         System.out.println("Maximum verification attempts exceeded.");
         return false;
     }
@@ -822,21 +851,21 @@ public class AccountService {
             System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
             System.out.println("║                    ACCOUNT INFORMATION                           ║");
             System.out.println("╚══════════════════════════════════════════════════════════════════╝");
-            
+
             // Display current information
             System.out.println("Current Account Information:");
             System.out.println("Username: " + account.getUsername());
-            
+
             // Display role-specific ID
             if (account instanceof Admin) {
                 Admin admin = (Admin) account;
                 System.out.println("Admin ID: " + admin.getAdminId());
             }
-            
+
             System.out.println("Full Name: " + account.getFullName());
             System.out.println("Email: " + account.getEmail());
             System.out.println("Contact Number: " + account.getContactNumber());
-            
+
             // Display customer-specific fields only for Customer accounts
             if (account instanceof Customer) {
                 Customer customer = (Customer) account;
@@ -844,7 +873,7 @@ public class AccountService {
                 System.out.println("Date of Birth: " + customer.getDateOfBirth());
                 System.out.println("License Number: " + customer.getLicenseNumber());
                 System.out.println("Emergency Contact: " + customer.getEmergencyContact());
-                
+
                 System.out.println("\n=== Which information would you like to modify? ===");
                 System.out.println("1. Full Name");
                 System.out.println("2. Contact Number");
@@ -859,49 +888,77 @@ public class AccountService {
             }
             System.out.println("0. Back");
             System.out.print("Select option: ");
-            
+
             String choice = scanner.nextLine();
-            
+
             boolean updated = false;
             switch (choice) {
                 case "1":
                     while (true) {
-                        System.out.print("Enter new full name: ");
-                        String newFullName = cleanAndValidateFullName(scanner.nextLine());
-                        if (newFullName == null || newFullName.isEmpty()) {
-                            System.out.println("Full name cannot be empty. Please try again.");
-                            continue;
+                        System.out.print("Enter new full name (or 'exit' to cancel): ");
+                        String input = scanner.nextLine();
+                        if (input.equalsIgnoreCase("exit")) {
+                            System.out.println("Operation cancelled.");
+                            break;
                         }
-                        if (!isValidFullName(newFullName)) {
-                            System.out.println("Full name can only contain letters, spaces, dots, apostrophes, and hyphens. Please try again.");
-                            continue;
+                        String newFullName = cleanAndValidateFullName(input);
+                        try {
+                            if (newFullName == null || newFullName.isEmpty()) {
+                                System.out.println("Full name cannot be empty. Please try again.");
+                                continue;
+                            }
+                            if (!isValidFullName(newFullName)) {
+                                System.out.println("Full name can only contain letters, spaces, dots, apostrophes, and hyphens. Please try again.");
+                                continue;
+                            }
+                            account.setFullName(newFullName);
+                            updated = true;
+                            break;
+                        } catch (IllegalArgumentException ex) {
+                            System.out.println("Error: " + ex.getMessage());
                         }
-                        account.setFullName(newFullName);
-                        updated = true;
-                        break;
                     }
                     break;
                 case "2":
                     while (true) {
-                        System.out.print("Enter new contact number (60xxxxxxxxx): ");
+                        System.out.print("Enter new contact number (60xxxxxxxxx) or 'exit' to cancel: ");
                         String newContact = scanner.nextLine().trim();
-                        if (isValidContactNumber(newContact)) {
-                            account.setContactNumber(newContact);
-                            updated = true;
+                        if (newContact.equalsIgnoreCase("exit")) {
+                            System.out.println("Operation cancelled.");
                             break;
-                        } else {
-                            System.out.println("Invalid contact number format. Please try again.");
+                        }
+                        try {
+                            if (isValidContactNumber(newContact)) {
+                                account.setContactNumber(newContact);
+                                updated = true;
+                                break;
+                            } else {
+                                System.out.println("Invalid contact number format. Please try again.");
+                            }
+                        } catch (IllegalArgumentException ex) {
+                            System.out.println("Error: " + ex.getMessage());
                         }
                     }
                     break;
                 case "3":
                     if (account instanceof Customer) {
                         Customer customer = (Customer) account;
-                        System.out.print("Enter new address: ");
-                        String newAddress = scanner.nextLine().trim();
-                        if (!newAddress.isEmpty()) {
-                            customer.setAddress(newAddress);
-                            updated = true;
+                        while (true) {
+                            System.out.print("Enter new address (or 'exit' to cancel): ");
+                            String newAddress = scanner.nextLine().trim();
+                            if (newAddress.equalsIgnoreCase("exit")) {
+                                System.out.println("Operation cancelled.");
+                                break;
+                            }
+                            try {
+                                if (!newAddress.isEmpty()) {
+                                    customer.setAddress(newAddress);
+                                    updated = true;
+                                }
+                                break;
+                            } catch (IllegalArgumentException ex) {
+                                System.out.println("Error: " + ex.getMessage());
+                            }
                         }
                     } else {
                         System.out.println("Invalid option for admin account.");
@@ -911,8 +968,12 @@ public class AccountService {
                     if (account instanceof Customer) {
                         Customer customer = (Customer) account;
                         while (true) {
-                            System.out.print("Enter new license number (xxxxxx-xx-xxxx): ");
+                            System.out.print("Enter new license number (xxxxxx-xx-xxxx) or 'exit' to cancel: ");
                             String newLicense = scanner.nextLine().trim();
+                            if (newLicense.equalsIgnoreCase("exit")) {
+                                System.out.println("Operation cancelled.");
+                                break;
+                            }
                             if (isValidLicenseNumber(newLicense)) {
                                 customer.setLicenseNumber(newLicense);
                                 // Update date of birth based on new license
@@ -934,10 +995,21 @@ public class AccountService {
                 case "5":
                     if (account instanceof Customer) {
                         Customer customer = (Customer) account;
-                        System.out.print("Enter new emergency contact (leave blank to clear): ");
-                        String newEmergency = scanner.nextLine().trim();
-                        customer.setEmergencyContact(newEmergency);
-                        updated = true;
+                        while (true) {
+                            System.out.print("Enter new emergency contact (leave blank to clear, or 'exit' to cancel): ");
+                            String newEmergency = scanner.nextLine().trim();
+                            if (newEmergency.equalsIgnoreCase("exit")) {
+                                System.out.println("Operation cancelled.");
+                                break;
+                            }
+                            try {
+                                customer.setEmergencyContact(newEmergency);
+                                updated = true;
+                                break;
+                            } catch (IllegalArgumentException ex) {
+                                System.out.println("Error: " + ex.getMessage());
+                            }
+                        }
                     } else {
                         System.out.println("Invalid option for admin account.");
                     }
@@ -950,7 +1022,7 @@ public class AccountService {
                     scanner.nextLine();
                     continue;
             }
-            
+
             if (updated) {
                 if (updateAccount(account.getUsername(), account)) {
                     saveAccounts("accounts.json");
@@ -972,9 +1044,9 @@ public class AccountService {
         System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
         System.out.println("║                        UPDATE EMAIL                              ║");
         System.out.println("╚══════════════════════════════════════════════════════════════════╝");
-        
+
         System.out.println("Current email: " + account.getEmail());
-        
+
         String newEmail;
         while (true) {
             System.out.print("Enter new email address: ");
@@ -985,7 +1057,7 @@ public class AccountService {
             }
             break;
         }
-        
+
         // Send verification code
         String verificationCode = generateVerificationCode();
         if (!sendEmailVerification(newEmail, verificationCode)) {
@@ -994,7 +1066,7 @@ public class AccountService {
             scanner.nextLine();
             return;
         }
-        
+
         if (verifyEmailCode(scanner, verificationCode, newEmail)) {
             account.setEmail(newEmail);
             if (updateAccount(account.getUsername(), account)) {
@@ -1006,7 +1078,7 @@ public class AccountService {
         } else {
             System.out.println("Email verification failed. Email update cancelled.");
         }
-        
+
         System.out.println("Press Enter to continue...");
         scanner.nextLine();
     }
@@ -1019,11 +1091,11 @@ public class AccountService {
         System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
         System.out.println("║                       CHANGE PASSWORD                            ║");
         System.out.println("╚══════════════════════════════════════════════════════════════════╝");
-        
+
         // Verify current password
         System.out.print("Enter current password: ");
         String currentPassword = scanner.nextLine();
-        
+
         // Verify current password
         if (!verifyPassword(currentPassword, account.getPassword())) {
             System.out.println("Current password is incorrect.");
@@ -1032,7 +1104,7 @@ public class AccountService {
             clearScreen();
             return;
         }
-        
+
         // Get new password
         String newPassword;
         while (true) {
@@ -1044,7 +1116,7 @@ public class AccountService {
             }
             break;
         }
-        
+
         // Confirm new password
         System.out.print("Confirm new password: ");
         String confirmPassword = scanner.nextLine();
@@ -1054,7 +1126,7 @@ public class AccountService {
             scanner.nextLine();
             return;
         }
-        
+
         // Hash and update password
         String hashedPassword = hashPassword(newPassword);
         if (updatePassword(account.getUsername(), hashedPassword)) {
@@ -1064,7 +1136,7 @@ public class AccountService {
         } else {
             System.out.println("Failed to change password.");
         }
-        
+
         System.out.println("Press Enter to continue...");
         scanner.nextLine();
         clearScreen();
@@ -1078,7 +1150,7 @@ public class AccountService {
         System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
         System.out.println("║                        ALL USER ACCOUNTS                         ║");
         System.out.println("╚══════════════════════════════════════════════════════════════════╝");
-        
+
         List<Account> allAccounts = getAccounts();
         if (allAccounts.isEmpty()) {
             System.out.println("No user accounts found.");
@@ -1086,31 +1158,32 @@ public class AccountService {
             scanner.nextLine();
             return;
         }
-        
-        System.out.println("\n┌─────┬─────────────┬─────────────────────┬──────────┬─────────────────────┬─────────────────────┐");
-        System.out.println("│ No. │ Username    │ Full Name           │ Role     │ Email               │ Contact             │");
-        System.out.println("├─────┼─────────────┼─────────────────────┼──────────┼─────────────────────┼─────────────────────┤");
-        
+
+        System.out.println("\n");
+        System.out.println("┌─────┬─────────────┬─────────────────────┬──────────┬───────────────────────────┬─────────────────────┐");
+        System.out.println("│ No. │ Username    │ Full Name           │ Role     │ Email                     │ Contact             │");
+        System.out.println("├─────┼─────────────┼─────────────────────┼──────────┼───────────────────────────┼─────────────────────┤");
+
         for (int i = 0; i < allAccounts.size(); i++) {
             Account acc = allAccounts.get(i);
-            System.out.printf("│ %-3d │ %-11s │ %-19s │ %-8s │ %-19s │ %-19s │%n",
-                (i + 1),
-                acc.getUsername().length() > 11 ? acc.getUsername().substring(0, 11) : acc.getUsername(),
-                acc.getFullName().length() > 19 ? acc.getFullName().substring(0, 19) : acc.getFullName(),
-                acc.getRole().toString(),
-                acc.getEmail().length() > 19 ? acc.getEmail().substring(0, 19) : acc.getEmail(),
-                acc.getContactNumber().length() > 19 ? acc.getContactNumber().substring(0, 19) : acc.getContactNumber());
+            System.out.printf("│ %-3d │ %-11s │ %-19s │ %-8s │ %-25s │ %-19s │%n",
+                    (i + 1),
+                    acc.getUsername().length() > 11 ? acc.getUsername().substring(0, 11) : acc.getUsername(),
+                    acc.getFullName().length() > 19 ? acc.getFullName().substring(0, 19) : acc.getFullName(),
+                    acc.getRole().toString(),
+                    acc.getEmail().length() > 25 ? acc.getEmail().substring(0, 25) : acc.getEmail(),
+                    acc.getContactNumber().length() > 19 ? acc.getContactNumber().substring(0, 19) : acc.getContactNumber());
         }
-        
-        System.out.println("└─────┴─────────────┴─────────────────────┴──────────┴─────────────────────┴─────────────────────┘");
+
+        System.out.println("└─────┴─────────────┴─────────────────────┴──────────┴───────────────────────────┴─────────────────────┘");
         System.out.println("\nTotal accounts: " + allAccounts.size());
-        
+
         // Allow searching from this view
         System.out.println("\nOptions:");
         System.out.println("1. Search accounts");
         System.out.println("0. Back");
         System.out.print("Select option: ");
-        
+
         String choice = scanner.nextLine();
         if (choice.equals("1")) {
             searchAndManageUserAccounts(scanner);
@@ -1123,19 +1196,20 @@ public class AccountService {
     public static void searchAndManageUserAccounts(Scanner scanner) {
         while (true) {
             clearScreen();
-            System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
+            System.out.println("╔══════════════════════════════════════════════════════════════════╗");
             System.out.println("║                   SEARCH & MANAGE ACCOUNTS                       ║");
             System.out.println("╚══════════════════════════════════════════════════════════════════╝");
-            
+
             System.out.print("Enter search term (username/name/email/phone, or press Enter for all): ");
             String searchTerm = scanner.nextLine().trim();
-            
+
+            System.out.println("\n");
             System.out.println("Filter by role:");
             System.out.println("1. All");
             System.out.println("2. Customer only");
             System.out.println("3. Admin only");
             System.out.print("Select option: ");
-            
+
             String roleChoice = scanner.nextLine();
             AccountRole filterRole = null;
             switch (roleChoice) {
@@ -1149,14 +1223,14 @@ public class AccountService {
                     filterRole = null; // All
                     break;
             }
-            
+
             List<Account> results = searchAccounts(searchTerm, filterRole);
-            
+
             clearScreen();
-            System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
+            System.out.println("╔══════════════════════════════════════════════════════════════════╗");
             System.out.println("║                      SEARCH RESULTS                              ║");
             System.out.println("╚══════════════════════════════════════════════════════════════════╝");
-            
+
             if (results.isEmpty()) {
                 System.out.println("No accounts found matching your criteria.");
                 System.out.println("\nPress Enter to search again, or type 'exit' to return to main menu: ");
@@ -1166,42 +1240,42 @@ public class AccountService {
                 }
                 continue;
             }
-            
-            // Display results
-            System.out.println("\n┌─────┬─────────────┬─────────────────────┬──────────┬─────────────────────┬─────────────────────┐");
-            System.out.println("│ No. │ Username    │ Full Name           │ Role     │ Email               │ Contact             │");
-            System.out.println("├─────┼─────────────┼─────────────────────┼──────────┼─────────────────────┼─────────────────────┤");
-            
+
+            System.out.println("┌─────┬─────────────┬─────────────────────┬──────────┬───────────────────────────┬─────────────────────┐");
+            System.out.println("│ No. │ Username    │ Full Name           │ Role     │ Email                     │ Contact             │");
+            System.out.println("├─────┼─────────────┼─────────────────────┼──────────┼───────────────────────────┼─────────────────────┤");
+
             for (int i = 0; i < results.size(); i++) {
                 Account acc = results.get(i);
-                System.out.printf("│ %-3d │ %-11s │ %-19s │ %-8s │ %-19s │ %-19s │%n",
-                    (i + 1),
-                    acc.getUsername().length() > 11 ? acc.getUsername().substring(0, 11) : acc.getUsername(),
-                    acc.getFullName().length() > 19 ? acc.getFullName().substring(0, 19) : acc.getFullName(),
-                    acc.getRole().toString(),
-                    acc.getEmail().length() > 19 ? acc.getEmail().substring(0, 19) : acc.getEmail(),
-                    acc.getContactNumber().length() > 19 ? acc.getContactNumber().substring(0, 19) : acc.getContactNumber());
+                System.out.printf("│ %-3d │ %-11s │ %-19s │ %-8s │ %-25s │ %-19s │\n",
+                        (i + 1),
+                        acc.getUsername().length() > 11 ? acc.getUsername().substring(0, 11) : acc.getUsername(),
+                        acc.getFullName().length() > 19 ? acc.getFullName().substring(0, 19) : acc.getFullName(),
+                        acc.getRole().toString(),
+                        acc.getEmail().length() > 25 ? acc.getEmail().substring(0, 25) : acc.getEmail(),
+                        acc.getContactNumber().length() > 19 ? acc.getContactNumber().substring(0, 19) : acc.getContactNumber());
             }
-            
-            System.out.println("└─────┴─────────────┴─────────────────────┴──────────┴─────────────────────┴─────────────────────┘");
-            System.out.println("\nFound " + results.size() + " accounts.");
-            
-            // Management options
-            System.out.println("\nSelect an account to manage (enter number), or:");
-            System.out.println("'search' - Search again");
-            System.out.println("'exit' - Return to main menu");
+
+            System.out.println("└─────┴─────────────┴─────────────────────┴──────────┴───────────────────────────┴─────────────────────┘");
+            System.out.println("Found " + results.size() + " accounts.");
+
+            System.out.println("\n");
+            System.out.println("Select an option:");
+            System.out.println("  [number] - Manage the account with that number");
+            System.out.println("  search   - Search again");
+            System.out.println("  exit     - Return to main menu");
             System.out.print("Your choice: ");
-            
+
             String choice = scanner.nextLine().trim();
-            
+
             if (choice.equalsIgnoreCase("exit")) {
                 return;
             }
-            
+
             if (choice.equalsIgnoreCase("search")) {
                 continue;
             }
-            
+
             try {
                 int accountIndex = Integer.parseInt(choice) - 1;
                 if (accountIndex >= 0 && accountIndex < results.size()) {
@@ -1220,32 +1294,26 @@ public class AccountService {
         }
     }
 
-    /**
-     * Manage selected account
-     */
     public static void manageSelectedAccount(Scanner scanner, Account account) {
         while (true) {
             clearScreen();
             System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
             System.out.println("║                      MANAGE ACCOUNT                              ║");
             System.out.println("╚══════════════════════════════════════════════════════════════════╝");
-            
-            // Display account information
+
             System.out.println("Account Information:");
             System.out.println("Username: " + account.getUsername());
             System.out.println("Role: " + account.getRole());
-            
-            // Display role-specific ID
+
             if (account instanceof Admin) {
                 Admin admin = (Admin) account;
                 System.out.println("Admin ID: " + admin.getAdminId());
             }
-            
+
             System.out.println("Full Name: " + account.getFullName());
             System.out.println("Email: " + account.getEmail());
             System.out.println("Contact Number: " + account.getContactNumber());
-            
-            // Display customer-specific fields only for Customer accounts
+
             if (account instanceof Customer) {
                 Customer customer = (Customer) account;
                 System.out.println("Address: " + customer.getAddress());
@@ -1253,22 +1321,22 @@ public class AccountService {
                 System.out.println("License Number: " + customer.getLicenseNumber());
                 System.out.println("Emergency Contact: " + customer.getEmergencyContact());
             }
-            
+
             System.out.println("\n=== What would you like to do? ===");
             System.out.println("1. Modify Account Information");
             System.out.println("2. Delete Account");
             System.out.println("0. Back to Search Results");
             System.out.print("Select option: ");
-            
+
             String choice = scanner.nextLine();
-            
+
             switch (choice) {
                 case "1":
                     modifySelectedAccount(scanner, account);
                     break;
                 case "2":
                     if (deleteSelectedAccount(scanner, account)) {
-                        return; // Account deleted, return to search
+                        return;
                     }
                     break;
                 case "0":
@@ -1286,10 +1354,11 @@ public class AccountService {
      */
     public static void addNewUserAccount(Scanner scanner) {
         clearScreen();
-        System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
-        System.out.println("║                       ADD NEW USER ACCOUNT                       ║"); 
+        System.out.println("\n");
+        System.out.println("╔══════════════════════════════════════════════════════════════════╗");
+        System.out.println("║                       ADD NEW USER ACCOUNT                       ║");
         System.out.println("╚══════════════════════════════════════════════════════════════════╝");
-        
+
         // Basic account information
         String username;
         while (true) {
@@ -1305,7 +1374,7 @@ public class AccountService {
             }
             break;
         }
-        
+
         String password;
         while (true) {
             System.out.print("Password: ");
@@ -1316,17 +1385,17 @@ public class AccountService {
             }
             break;
         }
-        
+
         // Hash the password
         password = hashPassword(password);
-        
+
         // Role selection
         System.out.println("Select role:");
         System.out.println("1. Customer");
         System.out.println("2. Admin");
         System.out.print("Select option: ");
         String roleChoice = scanner.nextLine();
-        
+
         AccountRole role;
         switch (roleChoice) {
             case "1":
@@ -1340,7 +1409,7 @@ public class AccountService {
                 role = AccountRole.CUSTOMER;
                 break;
         }
-        
+
         String email;
         while (true) {
             System.out.print("Email: ");
@@ -1351,7 +1420,7 @@ public class AccountService {
             }
             break;
         }
-        
+
         System.out.print("Full Name: ");
         String fullName = scanner.nextLine().trim();
         while (fullName.isEmpty()) {
@@ -1359,7 +1428,7 @@ public class AccountService {
             System.out.print("Full Name: ");
             fullName = scanner.nextLine().trim();
         }
-        
+
         String contactNumber;
         while (true) {
             System.out.print("Contact Number (60xxxxxxxxx): ");
@@ -1370,10 +1439,10 @@ public class AccountService {
             }
             break;
         }
-        
+
         System.out.print("Address: ");
         String address = scanner.nextLine().trim();
-        
+
         String licenseNumber = "";
         String dateOfBirth = "";
         if (role == AccountRole.CUSTOMER) {
@@ -1384,7 +1453,7 @@ public class AccountService {
                     System.out.println("Please enter a valid IC number in format: xxxxxx-xx-xxxx");
                     continue;
                 }
-                
+
                 if (!licenseNumber.isEmpty()) {
                     dateOfBirth = extractDateOfBirthFromIC(licenseNumber);
                     if (dateOfBirth != null) {
@@ -1394,20 +1463,20 @@ public class AccountService {
                 break;
             }
         }
-        
+
         System.out.print("Emergency Contact Number (optional): ");
         String emergencyContact = scanner.nextLine().trim();
-        
+
         // Create and save account
         Account newAccount;
         if (role == AccountRole.ADMIN) {
             newAccount = new Admin(username, password, email, fullName, contactNumber);
         } else {
-            newAccount = new Customer(username, password, email, fullName, 
-                                    contactNumber, address, dateOfBirth, 
-                                    licenseNumber, emergencyContact);
+            newAccount = new Customer(username, password, email, fullName,
+                    contactNumber, address, dateOfBirth,
+                    licenseNumber, emergencyContact);
         }
-        
+
         if (addAccount(newAccount)) {
             saveAccounts("accounts.json");
             System.out.println("\nAccount created successfully!");
@@ -1416,36 +1485,35 @@ public class AccountService {
         } else {
             System.out.println("Failed to create account.");
         }
-        
+
         System.out.println("Press Enter to continue...");
         scanner.nextLine();
     }
-
-
 
     /**
      * Modify selected account (integrated version)
      */
     public static void modifySelectedAccount(Scanner scanner, Account account) {
-        System.out.println("\n=== Which information would you like to modify? ===");
+        System.out.println("\n");
+        System.out.println("=== Which information would you like to modify? ===");
         System.out.println("1. Full Name");
         System.out.println("2. Email");
         System.out.println("3. Contact Number");
-        
+
         // Customer-specific options
         if (account instanceof Customer) {
             System.out.println("4. Address");
             System.out.println("5. License Number");
             System.out.println("6. Emergency Contact");
         }
-        
+
         System.out.println("7. Role");
         System.out.println("8. Reset Password");
         System.out.println("0. Back");
         System.out.print("Select option: ");
-        
+
         String choice = scanner.nextLine();
-        
+
         boolean updated = false;
         switch (choice) {
             case "1":
@@ -1545,7 +1613,7 @@ public class AccountService {
                 System.out.println("2. Admin");
                 System.out.print("Select option: ");
                 String roleChoice = scanner.nextLine();
-                
+
                 AccountRole newRole = null;
                 switch (roleChoice) {
                     case "1":
@@ -1558,7 +1626,7 @@ public class AccountService {
                         System.out.println("Invalid role selection.");
                         break;
                 }
-                
+
                 if (newRole != null && newRole != account.getRole()) {
                     account.setRole(newRole);
                     updated = true;
@@ -1576,7 +1644,7 @@ public class AccountService {
                     }
                     break;
                 }
-                
+
                 // Hash the password
                 String hashedPassword = hashPassword(newPassword);
                 account.setPassword(hashedPassword);
@@ -1591,7 +1659,7 @@ public class AccountService {
                 scanner.nextLine();
                 return;
         }
-        
+
         if (updated) {
             if (updateAccount(account.getUsername(), account)) {
                 saveAccounts("accounts.json");
@@ -1600,18 +1668,22 @@ public class AccountService {
                 System.out.println("Failed to update account information.");
             }
         }
-        
+
         System.out.println("Press Enter to continue...");
         scanner.nextLine();
     }
 
-    /**
-     * Delete selected account (integrated version)
-     */
     public static boolean deleteSelectedAccount(Scanner scanner, Account account) {
         // Prevent admin from deleting themselves
         System.out.print("Enter your admin username for confirmation: ");
         String adminUsername = scanner.nextLine().trim();
+
+        if (adminUsername.isEmpty()) {
+            System.out.println("Username cannot be empty!");
+            System.out.println("Press Enter to continue...");
+            scanner.nextLine();
+            return false;
+        }
         
         if (adminUsername.equals(account.getUsername())) {
             System.out.println("Error: You cannot delete your own account!");
@@ -1619,10 +1691,10 @@ public class AccountService {
             scanner.nextLine();
             return false;
         }
-        
+
         System.out.print("\nAre you sure you want to delete this account? (type 'DELETE' to confirm): ");
         String confirmation = scanner.nextLine();
-        
+
         if (confirmation.equals("DELETE")) {
             if (deleteAccount(account.getUsername())) {
                 saveAccounts("accounts.json");
@@ -1636,12 +1708,12 @@ public class AccountService {
         } else {
             System.out.println("Account deletion cancelled.");
         }
-        
+
         System.out.println("Press Enter to continue...");
         scanner.nextLine();
         return false;
     }
-    // Admin user management menu
+
     public static void adminUserManagement(Scanner scanner) {
         boolean firstTime = true;
         while (true) {
@@ -1650,7 +1722,8 @@ public class AccountService {
                 clearScreen();
             }
             firstTime = false;
-            
+
+            clearScreen();
             System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
             System.out.println("║                       USER MANAGEMENT                            ║");
             System.out.println("╠══════════════════════════════════════════════════════════════════╣");
@@ -1660,7 +1733,7 @@ public class AccountService {
             System.out.println("║  0. Back to Main Menu                                            ║");
             System.out.println("╚══════════════════════════════════════════════════════════════════╝");
             System.out.print("Select option: ");
-            
+
             String choice = scanner.nextLine();
             switch (choice) {
                 case "1":

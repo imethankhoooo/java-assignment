@@ -1,36 +1,20 @@
 package services;
-
-/**
- * 通用工具类 - 提供常用的工具方法
- * 遵循单一职责原则，将所有通用的工具方法集中管理
- */
 public class UtilityService {
 
-    /**
-     * 清空终端屏幕
-     * 支持Windows和Unix系统
-     */
     public static void clearScreen() {
         try {
-            // 检测操作系统
             String os = System.getProperty("os.name").toLowerCase();
 
             if (os.contains("win")) {
-                // Windows系统使用cls命令
                 new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
             } else {
-                // Unix/Linux/Mac系统使用clear命令
                 new ProcessBuilder("clear").inheritIO().start().waitFor();
             }
         } catch (Exception e) {
-            // 如果清屏失败，打印空行
             printEmptyLines(50);
         }
     }
 
-    /**
-     * 打印指定数量的空行
-     */
     public static void printEmptyLines(int count) {
         for (int i = 0; i < count; i++) {
             System.out.println();
@@ -38,9 +22,8 @@ public class UtilityService {
     }
 
     /**
-     * 转义JSON字符串中的特殊字符
-     * @param str 要转义的字符串
-     * @return 转义后的字符串
+     * @param str 
+     * @return 
      */
     public static String escapeJson(String str) {
         if (str == null) {
@@ -54,10 +37,9 @@ public class UtilityService {
     }
 
     /**
-     * 从JSON字符串中提取指定键的值
-     * @param json JSON字符串
-     * @param key 要提取的键
-     * @return 提取的值，如果未找到则返回null
+     * @param json 
+     * @param key 
+     * @return 
      */
     public static String extractJsonValue(String json, String key) {
         if (json == null || key == null) {
@@ -65,7 +47,6 @@ public class UtilityService {
         }
 
         try {
-            // 查找键的位置
             String keyPattern = "\"" + key + "\":";
             int keyIndex = json.indexOf(keyPattern);
 
@@ -73,25 +54,19 @@ public class UtilityService {
                 return null;
             }
 
-            // 移动到值的开始位置
             int valueStart = json.indexOf(':', keyIndex) + 1;
 
-            // 跳过空白字符
             while (valueStart < json.length() && Character.isWhitespace(json.charAt(valueStart))) {
                 valueStart++;
             }
 
-            // 处理不同类型的值
             char firstChar = json.charAt(valueStart);
 
             if (firstChar == '"') {
-                // 字符串值
                 return extractStringValue(json, valueStart);
             } else if (firstChar == '{' || firstChar == '[') {
-                // 对象或数组值
                 return extractComplexValue(json, valueStart, firstChar);
             } else {
-                // 数字、布尔值或null
                 return extractPrimitiveValue(json, valueStart);
             }
 
@@ -100,9 +75,6 @@ public class UtilityService {
         }
     }
 
-    /**
-     * 提取字符串值
-     */
     private static String extractStringValue(String json, int startIndex) {
         StringBuilder value = new StringBuilder();
         boolean escaped = false;
@@ -116,7 +88,6 @@ public class UtilityService {
             } else if (c == '\\') {
                 escaped = true;
             } else if (c == '"') {
-                // 找到结束引号
                 return value.toString();
             } else {
                 value.append(c);
@@ -125,10 +96,6 @@ public class UtilityService {
 
         return value.toString();
     }
-
-    /**
-     * 提取复杂值（对象或数组）
-     */
     private static String extractComplexValue(String json, int startIndex, char startChar) {
         char endChar = startChar == '{' ? '}' : ']';
         int braceCount = 0;
@@ -151,9 +118,6 @@ public class UtilityService {
         return value.toString();
     }
 
-    /**
-     * 提取原始值（数字、布尔值、null）
-     */
     private static String extractPrimitiveValue(String json, int startIndex) {
         StringBuilder value = new StringBuilder();
 
@@ -171,10 +135,9 @@ public class UtilityService {
     }
 
     /**
-     * 从JSON中提取完整的对象
-     * @param json JSON字符串
-     * @param key 对象键名
-     * @return 提取的对象JSON字符串
+     * @param json
+     * @param key
+     * @return
      */
     public static String extractJsonObject(String json, String key) {
         if (json == null || key == null) {
@@ -187,16 +150,14 @@ public class UtilityService {
                 return value;
             }
         } catch (Exception e) {
-            // 忽略异常，返回null
         }
 
         return null;
     }
 
     /**
-     * 分割JSON对象数组
-     * @param json JSON数组字符串
-     * @return 分割后的JSON对象数组
+     * @param json 
+     * @return 
      */
     public static String[] splitJsonObjects(String json) {
         if (json == null || json.trim().isEmpty()) {
@@ -250,9 +211,8 @@ public class UtilityService {
     }
 
     /**
-     * 验证邮箱格式
-     * @param email 邮箱地址
-     * @return 是否为有效邮箱
+     * @param email
+     * @return 
      */
     public static boolean isValidEmail(String email) {
         if (email == null || email.trim().isEmpty()) {
@@ -266,31 +226,27 @@ public class UtilityService {
     }
 
     /**
-     * 验证电话号码格式
-     * @param phoneNumber 电话号码
-     * @return 是否为有效电话号码
+     * @param phoneNumber
+     * @return
      */
     public static boolean isValidPhoneNumber(String phoneNumber) {
         if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
             return false;
         }
 
-        // 简单验证：只包含数字、空格、破折号、加号
         String phoneRegex = "^[\\d\\s\\-\\+]+$";
         return phoneRegex.matches(phoneNumber) && phoneNumber.length() >= 8;
     }
 
     /**
-     * 获取当前日期时间字符串
-     * @return 格式化的日期时间字符串
+     * @return
      */
     public static String getCurrentDateTime() {
         return java.time.LocalDateTime.now().toString();
     }
 
     /**
-     * 暂停程序执行指定毫秒数
-     * @param milliseconds 暂停时间（毫秒）
+     * @param milliseconds
      */
     public static void pause(long milliseconds) {
         try {

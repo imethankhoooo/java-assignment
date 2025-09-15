@@ -1,14 +1,5 @@
 [
   {
-    "username": "admin1",
-    "password": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
-    "role": "ADMIN",
-    "email": "ethankhoo05@gmail.com",
-    "fullName": "Ethan Khoo Tsui Ern",
-    "contactNumber": "601234567890",
-    "adminId": "A001"
-  },
-  {
     "username": "user1",
     "password": "e606e38b0d8c19b24cf0ee3808183162ea7cd63ff7912dbb22b5e803286b4446",
     "role": "CUSTOMER",
@@ -19,5 +10,38 @@
     "dateOfBirth": "2001-01-01",
     "licenseNumber": "010101-01-0101",
     "emergencyContact": ""
+  },
+  {
+    "username": "SYY",
+    "password": "c5210ccb563f8fd0ac071439cac5fcaa26b55c76778c043682d4cc79a73feb2e",
+    "role": "CUSTOMER",
+    "email": "yokeying0506@gmail.com",
+    "fullName": "Soo Yoke Ying",
+    "contactNumber": "60123451625",
+    "address": "Setapak",
+    "dateOfBirth": "2004-05-16",
+    "licenseNumber": "040516-81-5458",
+    "emergencyContact": "0125245125"
+  },
+  {
+    "username": "user2",
+    "password": "07fb47212f7d30f8c9e1d9843228b65a301cee6ea7624ea9372539ea21603246",
+    "role": "CUSTOMER",
+    "email": "sooyy-wm23@student.tarc.edu.my",
+    "fullName": "SooYY",
+    "contactNumber": "60123536555",
+    "address": "pv9",
+    "dateOfBirth": "2005-04-23",
+    "licenseNumber": "050423-10-5245",
+    "emergencyContact": ""
+  },
+  {
+    "username": "admin1",
+    "password": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+    "role": "ADMIN",
+    "email": "ethankhoo05@gmail.com",
+    "fullName": "Ethan Khoo Tsui Ern",
+    "contactNumber": "60124512565",
+    "adminId": "A003"
   }
 ]

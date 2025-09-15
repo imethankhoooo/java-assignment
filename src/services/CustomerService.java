@@ -1,16 +1,14 @@
 package services;
 
-import java.util.Scanner;
-import java.util.List;
-import java.util.ArrayList;
-
 import enums.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 import models.*;
-
 import static services.UtilityService.*;
 
 public class CustomerService extends AccountService {
-    
+
     /**
      * Get all customer accounts
      */
@@ -23,13 +21,13 @@ public class CustomerService extends AccountService {
         }
         return customers;
     }
-    
+
     /**
      * Customer-specific registration with IC validation
      */
     public static boolean registerCustomer(Scanner scanner) {
         System.out.println("\n=== CUSTOMER REGISTRATION ===");
-        
+
         String username;
         while (true) {
             System.out.print("Username: ");
@@ -44,7 +42,7 @@ public class CustomerService extends AccountService {
             }
             break;
         }
-        
+
         String password;
         while (true) {
             System.out.print("Password: ");
@@ -55,9 +53,9 @@ public class CustomerService extends AccountService {
             }
             break;
         }
-        
+
         password = hashPassword(password);
-        
+
         String email;
         while (true) {
             System.out.print("Email: ");
@@ -68,7 +66,7 @@ public class CustomerService extends AccountService {
             }
             break;
         }
-        
+
         System.out.print("Full Name: ");
         String fullName = scanner.nextLine().trim();
         while (fullName.isEmpty()) {
@@ -76,7 +74,7 @@ public class CustomerService extends AccountService {
             System.out.print("Full Name: ");
             fullName = scanner.nextLine().trim();
         }
-        
+
         String contactNumber;
         while (true) {
             System.out.print("Contact Number (60xxxxxxxxx): ");
@@ -87,7 +85,7 @@ public class CustomerService extends AccountService {
             }
             break;
         }
-        
+
         System.out.print("Address: ");
         String address = scanner.nextLine().trim();
         while (address.isEmpty()) {
@@ -95,7 +93,7 @@ public class CustomerService extends AccountService {
             System.out.print("Address: ");
             address = scanner.nextLine().trim();
         }
-        
+
         String licenseNumber;
         String dateOfBirth;
         while (true) {
@@ -105,41 +103,41 @@ public class CustomerService extends AccountService {
                 System.out.println("Please enter a valid IC number in format: xxxxxx-xx-xxxx");
                 continue;
             }
-            
+
             dateOfBirth = extractDateOfBirthFromIC(licenseNumber);
             if (dateOfBirth == null) {
                 System.out.println("Invalid IC number format. Cannot extract date of birth.");
                 continue;
             }
-            
+
             System.out.println("Date of birth extracted from IC: " + dateOfBirth);
             if (getYesNoInput(scanner, "Is this correct?")) {
                 break;
             }
         }
-        
+
         System.out.print("Emergency Contact Number (optional): ");
         String emergencyContact = scanner.nextLine().trim();
-        
+
         // Email verification
         System.out.println("\n=== EMAIL VERIFICATION ===");
         String verificationCode = generateVerificationCode();
-        
+
         if (!sendEmailVerification(email, verificationCode)) {
             System.out.println("Failed to send verification email. Registration cancelled.");
             return false;
         }
-        
+
         if (!verifyEmailCode(scanner, verificationCode, email)) {
             System.out.println("Email verification failed. Registration cancelled.");
             return false;
         }
-        
+
         // Create and save account
-        Customer newAccount = new Customer(username, password, email, fullName, 
-                                         contactNumber, address, dateOfBirth, 
-                                         licenseNumber, emergencyContact);
-        
+        Customer newAccount = new Customer(username, password, email, fullName,
+                contactNumber, address, dateOfBirth,
+                licenseNumber, emergencyContact);
+
         if (addAccount(newAccount)) {
             saveAccounts("accounts.json");
             System.out.println("\n=== REGISTRATION SUCCESSFUL! ===");
@@ -150,34 +148,32 @@ public class CustomerService extends AccountService {
             return false;
         }
     }
-    
-    /**
-     * Customer profile management
-     */
+
     public static void manageCustomerProfile(Scanner scanner, Account customerAccount) {
         if (customerAccount.getRole() != AccountRole.CUSTOMER) {
             System.out.println("This function is only for customer accounts.");
             return;
         }
-        
+
         while (true) {
             clearScreen();
-            System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
-            System.out.println("║                    CUSTOMER PROFILE                              ║");
+            System.out.println("\n");
+            System.out.println("╔══════════════════════════════════════════════════════════════════╗");
+            System.out.println("║                         CUSTOMER PROFILE                         ║");
             System.out.println("╠══════════════════════════════════════════════════════════════════╣");
             System.out.println("║ 1. View Profile Information                                      ║");
             System.out.println("║ 2. Update Profile Information                                    ║");
             System.out.println("║ 3. Change Password                                               ║");
             System.out.println("║ 4. Update Email Address                                          ║");
-            System.out.println("║ 0. Back                                                          ║");
+            System.out.println("║ 0. Back to Panel                                                 ║");
             System.out.println("╚══════════════════════════════════════════════════════════════════╝");
             System.out.print("Select option: ");
-            
+
             String choice = scanner.nextLine();
             switch (choice) {
                 case "1":
                     displayCustomerProfile(customerAccount);
-                    System.out.println("Press Enter to continue...");
+                    System.out.println("\nPress Enter to continue...");
                     scanner.nextLine();
                     clearScreen();
                     break;
@@ -194,29 +190,28 @@ public class CustomerService extends AccountService {
                     return;
                 default:
                     System.out.println("Invalid option. Please try again.");
-                    System.out.println("Press Enter to continue...");
+                    System.out.println("\nPress Enter to continue...");
                     scanner.nextLine();
             }
         }
     }
-    
-    /**
-     * Display customer profile information
-     */
+
     private static void displayCustomerProfile(Account customerAccount) {
-        System.out.println("\n=== CUSTOMER PROFILE ===");
-        System.out.println("Username: " + customerAccount.getUsername());
-        System.out.println("Full Name: " + customerAccount.getFullName());
-        System.out.println("Email: " + customerAccount.getEmail());
-        System.out.println("Contact Number: " + customerAccount.getContactNumber());
-        
-        // Display customer-specific fields only if this is a Customer instance
+        System.out.println("\n");
+        System.out.println("=====================================");
+        System.out.println("            CUSTOMER PROFILE          ");
+        System.out.println("=====================================");
+        System.out.printf("%-20s : %s\n", "Username", customerAccount.getUsername());
+        System.out.printf("%-20s : %s\n", "Full Name", customerAccount.getFullName());
+        System.out.printf("%-20s : %s\n", "Email", customerAccount.getEmail());
+        System.out.printf("%-20s : %s\n", "Contact Number", customerAccount.getContactNumber());
+
         if (customerAccount instanceof Customer) {
             Customer customer = (Customer) customerAccount;
-            System.out.println("Address: " + customer.getAddress());
-            System.out.println("Date of Birth: " + customer.getDateOfBirth());
-            System.out.println("License Number: " + customer.getLicenseNumber());
-            System.out.println("Emergency Contact: " + customer.getEmergencyContact());
+            System.out.printf("%-20s : %s\n", "Address", customer.getAddress());
+            System.out.printf("%-20s : %s\n", "Date of Birth", customer.getDateOfBirth());
+            System.out.printf("%-20s : %s\n", "License Number", customer.getLicenseNumber());
+            System.out.printf("%-20s : %s\n", "Emergency Contact", customer.getEmergencyContact());
         }
     }
 }

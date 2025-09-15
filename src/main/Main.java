@@ -1,9 +1,8 @@
 package main;
+import enums.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
-
-import enums.*;
 import models.*;
 import services.*;
 import static services.UtilityService.*;
@@ -36,7 +35,17 @@ public class Main {
         
         Scanner scanner = new Scanner(System.in);
         clearScreen();
-        System.out.println("Welcome to Vehicle Rental Service System");
+        // Display ASCII art banner
+        System.out.println("\n\n\n\n");
+        System.out.println("                     ▄████████    ▄████████    ▄████████    ▄████████    ▄████████    ▄████████    ▄█   ▄█▄ ");
+        System.out.println("                    ███    ███   ███    ███   ███    ███   ███    ███   ███    ███   ███    ███   ███ ▄███▀ ");
+        System.out.println("                    ███    █▀    ███    ███   ███    ███   ███    █▀    ███    █▀    ███    █▀    ███▐██▀   ");
+        System.out.println("                    ███          ███    ███  ▄███▄▄▄▄██▀   ███         ▄███▄▄▄      ▄███▄▄▄      ▄█████▀    ");
+        System.out.println("                    ███        ▀███████████ ▀▀███▀▀▀▀▀   ▀███████████ ▀▀███▀▀▀     ▀▀███▀▀▀     ▀▀█████▄    ");
+        System.out.println("                    ███    █▄    ███    ███ ▀███████████          ███   ███    █▄    ███    █▄    ███▐██▄   ");
+        System.out.println("                    ███    ███   ███    ███   ███    ███    ▄█    ███   ███    ███   ███    ███   ███ ▀███▄ ");
+        System.out.println("                    ████████▀    ███    █▀    ███    ███  ▄████████▀    ██████████   ██████████   ███   ▀█▀ ");
+        System.out.println("                                              ███    ███                                          ▀         ");
         
         // Check and send automatic reminders (but don't display summary yet)
         system.checkAndSendReminders();
@@ -63,11 +72,13 @@ public class Main {
                     AccountService.registerProcess(scanner);
                     break;
                 case "0":
-                    System.out.println("Thank you for using Vehicle Rental Service System. Goodbye!");
+                    System.out.println("Thank you for using CARSEEK. Goodbye!");
                     system.shouldExit = true;
                     break;
                 default:
-                    System.out.println("Invalid option. Please try again.");
+                    System.out.println("INVALID OPTION. PRESS ENTER TO CONTINUE...");
+                    scanner.nextLine();
+                    clearScreen();
                     break;
             }
             } else {

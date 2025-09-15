@@ -73,6 +73,9 @@ public class Admin extends Account {
      * Set admin ID (for JSON loading)
      */
     public void setAdminId(String adminId) {
+        if (adminId == null || !adminId.matches("A\\d{3}")) {
+            throw new IllegalArgumentException("Invalid admin ID format (expected Axxx)");
+        }
         this.adminId = adminId;
     }
     

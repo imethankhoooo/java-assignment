@@ -2,21 +2,12 @@ package models;
 
 import enums.AccountRole;
 
-/**
- * Customer class representing customer accounts in the system
- * Inherits from Account class - maintains existing functionality with inheritance
- */
 public class Customer extends Account {
-    // Customer-specific fields
     private String address;
     private String dateOfBirth;
     private String licenseNumber;
     private String emergencyContact;
 
-    /**
-     * Constructor for backward compatibility
-     * Maps name and contact to Account's fullName and contactNumber
-     */
     public Customer(String name, String contact) {
         super("", "", AccountRole.CUSTOMER, "", name, contact);
         this.address = "";
@@ -25,9 +16,6 @@ public class Customer extends Account {
         this.emergencyContact = "";
     }
 
-    /**
-     * Constructor with account information
-     */
     public Customer(String username, String password, String email, String fullName,
                    String contactNumber, String address, String dateOfBirth,
                    String licenseNumber, String emergencyContact) {
@@ -39,42 +27,28 @@ public class Customer extends Account {
     }
 
 
-
-    /**
-     * Backward compatibility method - maps to getFullName()
-     */
     public String getName() {
         return getFullName();
     }
 
-    /**
-     * Backward compatibility method - maps to setFullName()
-     */
     public void setName(String name) {
         setFullName(name);
     }
 
-    /**
-     * Backward compatibility method - maps to getContactNumber()
-     */
     public String getContact() {
         return getContactNumber();
     }
 
-    /**
-     * Backward compatibility method - maps to setContactNumber()
-     */
     public void setContact(String contact) {
         setContactNumber(contact);
     }
 
-    // Customer-specific field getters and setters
     public String getAddress() { 
         return address; 
     }
     
     public void setAddress(String address) { 
-        this.address = address != null ? address : ""; 
+        this.address = address != null ? address.trim() : ""; 
     }
     
     public String getDateOfBirth() { 
@@ -82,7 +56,7 @@ public class Customer extends Account {
     }
     
     public void setDateOfBirth(String dateOfBirth) { 
-        this.dateOfBirth = dateOfBirth != null ? dateOfBirth : ""; 
+        this.dateOfBirth = dateOfBirth != null ? dateOfBirth.trim() : ""; 
     }
     
     public String getLicenseNumber() { 
@@ -90,7 +64,7 @@ public class Customer extends Account {
     }
     
     public void setLicenseNumber(String licenseNumber) { 
-        this.licenseNumber = licenseNumber != null ? licenseNumber : ""; 
+        this.licenseNumber = licenseNumber != null ? licenseNumber.trim() : ""; 
     }
     
     public String getEmergencyContact() { 
@@ -98,10 +72,8 @@ public class Customer extends Account {
     }
     
     public void setEmergencyContact(String emergencyContact) { 
-        this.emergencyContact = emergencyContact != null ? emergencyContact : ""; 
+        this.emergencyContact = emergencyContact != null ? emergencyContact.trim() : ""; 
     }
-
-    // Implementation of abstract methods from Account class
     
     @Override
     public String getAccountType() {

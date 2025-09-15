@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.time.LocalDate;
 
 import models.Booking;
+import enums.VehicleStatus;
 
 public class Vehicle {
     private String vehicleID;
@@ -20,7 +21,7 @@ public class Vehicle {
     private double capacity;
     private String condition;
     private double insuranceRate;
-    private String available; // "available", "rented", "reserved", "out_of_service"
+    private VehicleStatus status; // Enum-backed vehicle status
     private boolean archived; // true = archived, false = active
     
     private double basePrice; 
@@ -42,7 +43,7 @@ public class Vehicle {
         this.capacity = capacity;
         this.condition = condition;
         this.insuranceRate = insuranceRate;
-        this.available = available;
+        this.status = parseStatus(available);
         this.archived = false; 
         
 
@@ -66,7 +67,7 @@ public class Vehicle {
     public void setColor(String color) { this.color = color; }
     public void setCondition(String condition) { this.condition = condition; }
     public void setInsuranceRate(double insuranceRate) { this.insuranceRate = insuranceRate; }
-    public void setAvailable(String available) { this.available = available; }
+    public void setAvailable(String available) { this.status = parseStatus(available); }
     public void setArchived(boolean archived) { this.archived = archived; }
     public void setBasePrice(double basePrice) { this.basePrice = basePrice; }
     public void setLongTermDiscounts(Map<Integer, Double> longTermDiscounts) { 
@@ -85,7 +86,7 @@ public class Vehicle {
     public double getCapacity() { return capacity; }
     public String getCondition() { return condition; }
     public double getInsuranceRate() { return insuranceRate; }
-    public String getAvailable() { return available; }
+    public String getAvailable() { return statusToString(status); }
     public boolean isArchived() { return archived; }
     public double getBasePrice() { return basePrice; }
     public Map<Integer, Double> getLongTermDiscounts() { return longTermDiscounts; }
@@ -107,17 +108,17 @@ public class Vehicle {
     public String getVehicleType() { return carType; }
     
 
-    public String getStatus() { return available; }
+    public String getStatus() { return statusToString(status); }
 
-    public void setStatus(String status) { this.available = status; }
+    public VehicleStatus getVehicleStatus() { return status; }
 
-    
-    /**
-     * 检查车辆在指定日期范围内是否可用
-     */
+    public void setStatus(String status) { this.status = parseStatus(status); }
+
+    public void setVehicleStatus(VehicleStatus status) { this.status = status; }
+
     public boolean isAvailable(LocalDate startDate, LocalDate endDate) {
         
-        if (!"available".equalsIgnoreCase(available)) {
+        if (status != VehicleStatus.AVAILABLE) {
             return false;
         }
         
@@ -210,18 +211,28 @@ public class Vehicle {
      * check if can extend rental (same user extension does not need buffer)
      */
     public boolean isAvailableForExtension(LocalDate startDate, LocalDate endDate, String username) {
-        
-        if (!"available".equalsIgnoreCase(available) && !"rented".equalsIgnoreCase(available)) {
+        if (!(status == VehicleStatus.AVAILABLE || status == VehicleStatus.RENTED || status == VehicleStatus.RESERVED)) {
             return false;
         }
-        
-        
+
         for (Booking booking : schedule) {
             if (overlapsDirectly(startDate, endDate, booking.getStartDate(), booking.getEndDate())) {
                 return false;
             }
         }
         return true;
+    }
+
+    /**
+     * add booking for extension (no global availability or buffer check)
+     */
+    public void addBookingForExtension(LocalDate startDate, LocalDate endDate) {
+        for (Booking booking : schedule) {
+            if (overlapsDirectly(startDate, endDate, booking.getStartDate(), booking.getEndDate())) {
+                throw new IllegalArgumentException("Vehicle is not available for the extended period");
+            }
+        }
+        schedule.add(new Booking(startDate, endDate));
     }
     
     private boolean overlapsDirectly(LocalDate start1, LocalDate end1, LocalDate start2, LocalDate end2) {
@@ -247,7 +258,42 @@ public class Vehicle {
     public String toString() {
         return String.format(
             "VehicleID: %s, %s %s | Type: %s | Fuel: %s | Color: %s | Year: %d | Engine Capacity: %.2f | Condition: %s | Rate: RM%.2f/day | Status: %s",
-            vehicleID, carBrand, carModel, carType, fuelType, color, purchaseYear, capacity, condition, basePrice, available
+            vehicleID, carBrand, carModel, carType, fuelType, color, purchaseYear, capacity, condition, basePrice, statusToString(status)
         );
+    }
+
+    private static VehicleStatus parseStatus(String value) {
+        if (value == null) return VehicleStatus.AVAILABLE;
+        String v = value.trim().toLowerCase();
+        switch (v) {
+            case "available":
+                return VehicleStatus.AVAILABLE;
+            case "reserved":
+                return VehicleStatus.RESERVED;
+            case "rented":
+                return VehicleStatus.RENTED;
+            case "out_of_service":
+                return VehicleStatus.OUT_OF_SERVICE;
+            case "archived":
+                return VehicleStatus.AVAILABLE; // archived handled by separate flag
+            default:
+                return VehicleStatus.AVAILABLE;
+        }
+    }
+
+    private static String statusToString(VehicleStatus status) {
+        if (status == null) return "available";
+        switch (status) {
+            case AVAILABLE:
+                return "available";
+            case RESERVED:
+                return "reserved";
+            case RENTED:
+                return "rented";
+            case OUT_OF_SERVICE:
+                return "out_of_service";
+            default:
+                return "available";
+        }
     }
 } 

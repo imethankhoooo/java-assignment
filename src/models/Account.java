@@ -2,11 +2,6 @@ package models;
 import enums.AccountRole;
 import interfaces.User;
 
-/**
- * Abstract Account base class supporting users and administrators
- * Common fields only - customer-specific fields moved to Customer class
- * Implements User interface and provides common functionality
- */
 public abstract class Account implements User {
     private String username;
     private String password;
@@ -49,7 +44,10 @@ public abstract class Account implements User {
     }
 
     public void setUsername(String username) {
-        this.username = username;
+        if (username == null || username.trim().isEmpty()) {
+            throw new IllegalArgumentException("Username cannot be empty");
+        }
+        this.username = username.trim();
     }
 
     public String getPassword() {
@@ -57,6 +55,9 @@ public abstract class Account implements User {
     }
 
     public void setPassword(String password) {
+        if (password == null || password.isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be empty");
+        }
         this.password = password;
     }
 
@@ -65,23 +66,48 @@ public abstract class Account implements User {
     }
 
     public void setRole(AccountRole role) {
+        if (role == null) {
+            throw new IllegalArgumentException("Role cannot be null");
+        }
         this.role = role;
     }
     
     public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email != null ? email : ""; }
+    public void setEmail(String email) { 
+        if (email == null || email.trim().isEmpty()) {
+            this.email = "";
+            return;
+        }
+        String e = email.trim();
+        if (!(e.contains("@") && e.contains(".") && e.indexOf("@") < e.lastIndexOf("."))) {
+            throw new IllegalArgumentException("Invalid email format");
+        }
+        this.email = e; 
+    }
     
     public String getFullName() { return fullName; }
-    public void setFullName(String fullName) { this.fullName = fullName != null ? fullName : ""; }
+    public void setFullName(String fullName) { this.fullName = fullName != null ? fullName.trim() : ""; }
     
     public String getContactNumber() { return contactNumber; }
-    public void setContactNumber(String contactNumber) { this.contactNumber = contactNumber != null ? contactNumber : ""; }
+    public void setContactNumber(String contactNumber) { 
+        if (contactNumber == null || contactNumber.trim().isEmpty()) {
+            this.contactNumber = "";
+            return;
+        }
+        String digitsOnly = contactNumber.replaceAll("\\D", "");
+        if (!(contactNumber.startsWith("60") && digitsOnly.length() >= 11 && digitsOnly.length() <= 13)) {
+            throw new IllegalArgumentException("Invalid contact number format");
+        }
+        this.contactNumber = contactNumber.trim(); 
+    }
     
     // Implementation of User interface methods
     
     @Override
     public boolean validateCredentials(String password) {
-        return this.password.equals(password);
+        if (password == null) return false;
+        String hashed = hashPassword(password);
+        return this.password.equals(hashed) || this.password.equals(password);
     }
     
     @Override
@@ -117,5 +143,22 @@ public abstract class Account implements User {
      * @return true if account-specific data is valid
      */
     public abstract boolean validateAccountSpecificData();
+
+    // Local hashing utility to avoid cross-package dependency
+    private static String hashPassword(String password) {
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(password.getBytes("UTF-8"));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (Exception e) {
+            return Integer.toString(password.hashCode());
+        }
+    }
 
 } 

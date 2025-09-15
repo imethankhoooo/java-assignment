@@ -76,7 +76,7 @@ public class vehicleService {
      */
     public static Vehicle parseVehicleFromJson(String json) {
         try {
-            // 解析新格式的JSON字段
+
             String vehicleID = extractJsonValue(json, "vehicleID");
             String plateNo = extractJsonValue(json, "plateNo");
             String brand = extractJsonValue(json, "brand");
@@ -244,15 +244,15 @@ public class vehicleService {
         System.out.println("\n╔═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗");
         System.out.println("║                                                 Available Vehicles                                                ║");
         System.out.println("╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣");
-        System.out.printf("║ %-14s %-10s %-10s %-13s %-10s %-10s %-12s %-12s %-14s ║%n",
-                "PlateNo", "Brand", "Model", "Type", "Fuel", "Color", "Capacity", "Condition", "InsuranceRate");
+        System.out.printf("║ %-14s %-10s %-10s %-13s %-10s %-10s %-12s %-12s %-14s %-11s ║%n",
+                "PlateNo", "Brand", "Model", "Type", "Fuel", "Color", "Capacity", "Condition", "InsuranceRate", "Availability");
         System.out.println("╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣");
 
             for (Vehicle v : vehicles) {
-            if (!v.isArchived() && v.getAvailable().equalsIgnoreCase("available")) {
-                System.out.printf("║ %-14s %-10s %-10s %-13s %-10s %-10s %-12.1f %-12s %-14.2f ║%n",
+            if (!v.isArchived()) {
+                System.out.printf("║ %-14s %-10s %-10s %-13s %-10s %-10s %-12.1f %-12s %-14.2f %-11s ║%n",
                         v.getPlateNo(), v.getBrand(), v.getModel(), v.getType(), v.getFuelType(),
-                        v.getColor(), v.getCapacity(), v.getCondition(), v.getInsuranceRate());
+                        v.getColor(), v.getCapacity(), v.getCondition(), v.getInsuranceRate(), v.getAvailable());
             }
         }
         System.out.println("╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝\n");
@@ -276,7 +276,7 @@ public class vehicleService {
             if (!v.isArchived()) { // Only show non-archived vehicles in search results
                 System.out.printf("║ %-13s %-12s %-10s %-10s %-13s %-10s %-10s %-15d %-12.1f %-12s %-15.2f %-12s ║%n",
                         v.getVehicleID(), v.getPlateNo(), v.getBrand(), v.getModel(), v.getType(), v.getFuelType(), v.getColor(), 
-                        v.getYear(), v.getCapacity(), v.getCondition(), v.getInsuranceRate(), v.getAvailable());
+                        v.getYear(), v.getCapacity(), v.getCondition(), v.getInsuranceRate(), v.getStatus());
             }
         }
         System.out.println("╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝\n");

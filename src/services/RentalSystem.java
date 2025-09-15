@@ -407,7 +407,8 @@ public class RentalSystem {
         Rental rental = findRentalById(rentalId);
         if (rental != null && rental.getStatus() == RentalStatus.PENDING) {
             rental.setStatus(RentalStatus.ACTIVE);
-            rental.getVehicle().setStatus("rented");
+            // Keep vehicle reserved until actual pickup
+            rental.getVehicle().setStatus("reserved");
 
             // Generate ticket for approved rental
             Ticket ticket = ticketService.generateTicket(rental);
@@ -849,6 +850,30 @@ public class RentalSystem {
     }
 
     /**
+     * Find pending rental by user and vehicle
+     */
+    public Rental findPendingRentalByUserAndVehicle(String username, int vehicleId) {
+        // Try to match by username first
+        for (Rental rental : rentals) {
+            if (rental.getVehicle().getId() == vehicleId && rental.getStatus() == RentalStatus.PENDING) {
+                if (rental.getUsername() != null && rental.getUsername().equals(username)) {
+                    return rental;
+                }
+            }
+        }
+
+        // Fallback: try match by customer name equals username
+        for (Rental rental : rentals) {
+            if (rental.getVehicle().getId() == vehicleId && rental.getStatus() == RentalStatus.PENDING) {
+                if (rental.getCustomer() != null && rental.getCustomer().getName().equals(username)) {
+                    return rental;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Extend existing rental
      */
     public boolean extendRental(String username, int vehicleId, LocalDate newEndDate, boolean insurance) {
@@ -860,9 +885,9 @@ public class RentalSystem {
         Vehicle vehicle = existingRental.getVehicle();
         LocalDate originalEndDate = existingRental.getEndDate();
 
-        // Update vehicle booking schedule
+        // Update vehicle booking schedule (extension-safe, no global buffer check)
         vehicle.removeBooking(existingRental.getStartDate(), originalEndDate);
-        vehicle.addBooking(existingRental.getStartDate(), newEndDate);
+        vehicle.addBookingForExtension(existingRental.getStartDate(), newEndDate);
 
         // Calculate new total fee
         double newTotalFee = calculateRentalFee(vehicle, existingRental.getStartDate(), newEndDate, insurance);
@@ -883,6 +908,33 @@ public class RentalSystem {
         saveRentals("rentals.json");
         vehicleService.saveVehicles("vehicles.json");
 
+        return true;
+    }
+
+    /**
+     * Extend pending rental by same user and vehicle
+     */
+    public boolean extendPendingRental(String username, int vehicleId, LocalDate newEndDate, boolean insurance) {
+        Rental pending = findPendingRentalByUserAndVehicle(username, vehicleId);
+        if (pending == null) {
+            return false;
+        }
+
+        Vehicle vehicle = pending.getVehicle();
+        LocalDate originalEndDate = pending.getEndDate();
+
+        // Update schedule for pending extension
+        vehicle.removeBooking(pending.getStartDate(), originalEndDate);
+        vehicle.addBookingForExtension(pending.getStartDate(), newEndDate);
+
+        // Recompute fee and update rental fields
+        double newTotalFee = calculateRentalFee(vehicle, pending.getStartDate(), newEndDate, insurance);
+        pending.setEndDate(newEndDate);
+        pending.setTotalFee(newTotalFee);
+        pending.setInsuranceSelected(insurance);
+
+        saveRentals("rentals.json");
+        vehicleService.saveVehicles("vehicles.json");
         return true;
     }
 
@@ -952,8 +1004,8 @@ public class RentalSystem {
         System.out.println("║                          VEHICLE BOOKING                         ║");
         System.out.println("╚══════════════════════════════════════════════════════════════════╝");
 
-        // Display all vehicles with their status
-        vehicleService.displayAvailableVehicles(); // Show all vehicles in new format
+        // Display all vehicles with their status (include available & reserved)
+        vehicleService.displayAvailableVehicles();
 
         String plateNo;
         Vehicle selected = null;
@@ -1089,6 +1141,73 @@ public class RentalSystem {
                 System.out.println("You chose not to extend. Proceeding with new booking for this vehicle (if available).");
             }
 
+        }
+
+        // Also check for existing pending rental by the same user for this vehicle
+        Rental pendingRental = system.findPendingRentalByUserAndVehicle(account.getUsername(), vehicleId);
+        if (pendingRental != null) {
+            System.out.println("\n=== EXISTING RENTAL DETECTED ===\n");
+            System.out.printf("You already have a pending rental for this vehicle:\n");
+            System.out.printf("  Current rental period: %s to %s\n", pendingRental.getStartDate(), pendingRental.getEndDate());
+            System.out.printf("  Total fee: RM%.2f\n", pendingRental.getTotalFee());
+            System.out.println("This booking is awaiting approval. You can choose another period if needed.");
+
+            if (AccountService.getYesNoInput(scanner, "\nDo you want to extend this pending rental instead?")) {
+                int additionalDays = 0;
+                while (additionalDays <= 0) {
+                    System.out.print("How many additional days do you want to extend (or 'exit' to return)? ");
+                    String daysStr = scanner.nextLine();
+
+                    if (daysStr.equalsIgnoreCase("exit")) {
+                        System.out.println("Returning to main menu...");
+                        return;
+                    }
+
+                    try {
+                        additionalDays = Integer.parseInt(daysStr);
+                        if (additionalDays <= 0) {
+                            System.out.println("Extension days must be positive.");
+                            System.out.println("\nPress Enter to continue...");
+                            scanner.nextLine();
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid number format. Please enter a valid number.");
+                        System.out.println("\nPress Enter to continue...");
+                        scanner.nextLine();
+                    }
+                }
+
+                LocalDate newEndDate = pendingRental.getEndDate().plusDays(additionalDays);
+
+                // Show extension details
+                System.out.println("\n=== Extension Details ===\n");
+                System.out.printf("Original end date: %s\n", pendingRental.getEndDate());
+                System.out.printf("New proposed end date: %s\n", newEndDate);
+                System.out.printf("Additional days: %d\n", additionalDays);
+
+                int totalDays = (int) java.time.temporal.ChronoUnit.DAYS.between(pendingRental.getStartDate(),
+                        newEndDate) + 1;
+                double discount = selected.getDiscountForDays(totalDays);
+                if (discount > 0) {
+                    System.out.printf("New total period: %d days\n", totalDays);
+                    System.out.printf("Long-term discount: %.1f%% off\n", discount * 100);
+                }
+
+                double insuranceRate2 = selected.getInsuranceRate();
+                System.out.printf("\nInsurance rate: %.1f%%\n", insuranceRate2 * 100);
+                boolean insurance2 = AccountService.getYesNoInput(scanner, "Include insurance for the extended period?");
+
+                if (system.extendPendingRental(account.getUsername(), vehicleId, newEndDate, insurance2)) {
+                    System.out.println("\n=== PENDING RENTAL EXTENSION SUCCESSFUL ===\n");
+                    System.out.printf("Extended until: %s\n", newEndDate);
+                } else {
+                    System.out.println("Failed to extend pending rental. Please try again or contact support.");
+                }
+
+                System.out.println("\nPress Enter to continue...");
+                scanner.nextLine();
+                return;
+            }
         }
 
         // If not extending, or no existing rental, proceed with new booking process
@@ -2397,12 +2516,11 @@ public class RentalSystem {
             System.out.println("║  2. View All Rentals                                             ║");
             System.out.println("║  3. Rental Management (Pending/Approve/Reject)                   ║");
             System.out.println("║  4. Confirm Vehicle Return                                       ║");
-            System.out.println("║  5. Add New Vehicle                                              ║");
-            System.out.println("║  6. Reports & Analytics                                          ║");
-            System.out.println("║  7. View Reminders                                               ║");
-            System.out.println("║  8. Ticket Management                                            ║");
-            System.out.println("║  9. Message Center                                               ║");
-            System.out.println("║ 10. Offline Booking (Walk-in Customers)                          ║");
+            System.out.println("║  5. Reports & Analytics                                          ║");
+            System.out.println("║  6. View Reminders                                               ║");
+            System.out.println("║  7. Ticket Management                                            ║");
+            System.out.println("║  8. Message Center                                               ║");
+            System.out.println("║  9. Offline Booking (Walk-in Customers)                          ║");
             System.out.println("║  0. Back to Main Menu                                            ║");
             System.out.println("╚══════════════════════════════════════════════════════════════════╝");
             System.out.print("Select option: ");
@@ -2428,26 +2546,21 @@ public class RentalSystem {
                     scanner.nextLine();
                     break;
                 case "5":
-                    vehicleService.addNewVehicle(system, scanner);
-                    System.out.println("\nPress Enter to continue...");
-                    scanner.nextLine();
-                    break;
-                case "6":
                     reportsAndAnalytics(system, scanner);
                     break;
-                case "7":
+                case "6":
                     ReminderService reminderService = new ReminderService(system);
                     reminderService.displayReminderSummary();
                     System.out.println("\nPress Enter to continue...");
                     scanner.nextLine();
                     break;
-                case "8":
+                case "7":
                     ticketManagement(system, scanner);
                     break;
-                case "9":
+                case "8":
                     MessageService.messageCenter(system, scanner, "admin");
                     break;
-                case "10":
+                case "9":
                     RentalSystem.offlineBooking(system, scanner);
                     break;
                 case "0":
