@@ -248,7 +248,6 @@ public class AccountService {
         json.append("]");
         return json.toString();
     }
-    // ===== 账户管理功能 =====
 
     /**
      * Add new account with notification service update
@@ -285,7 +284,6 @@ public class AccountService {
             return false;
         }
 
-        // Update fields
         existingAccount.setEmail(updatedAccount.getEmail());
         existingAccount.setFullName(updatedAccount.getFullName());
         existingAccount.setContactNumber(updatedAccount.getContactNumber());
@@ -848,31 +846,31 @@ public class AccountService {
     public static void viewAndModifyAccountInfo(Scanner scanner, Account account) {
         while (true) {
             clearScreen();
-            System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
-            System.out.println("║                    ACCOUNT INFORMATION                           ║");
-            System.out.println("╚══════════════════════════════════════════════════════════════════╝");
+            System.out.println("\n╔═════════════════════════════════════════════════════════════════╗");
+            System.out.println("║                    ACCOUNT INFORMATION                          ║");
+            System.out.println("║═════════════════════════════════════════════════════════════════║");
 
             // Display current information
-            System.out.println("Current Account Information:");
-            System.out.println("Username: " + account.getUsername());
+            System.out.printf("║ %-30s ║ %-30s ║\n", "Username", account.getUsername());
 
             // Display role-specific ID
             if (account instanceof Admin) {
                 Admin admin = (Admin) account;
-                System.out.println("Admin ID: " + admin.getAdminId());
+                System.out.printf("║ %-30s ║ %-30s ║\n", "Admin ID", admin.getAdminId());
             }
 
-            System.out.println("Full Name: " + account.getFullName());
-            System.out.println("Email: " + account.getEmail());
-            System.out.println("Contact Number: " + account.getContactNumber());
+            System.out.printf("║ %-30s ║ %-30s ║\n", "Full Name", account.getFullName());
+            System.out.printf("║ %-30s ║ %-30s ║\n", "Email", account.getEmail());
+            System.out.printf("║ %-30s ║ %-30s ║\n", "Contact Number", account.getContactNumber());
 
             // Display customer-specific fields only for Customer accounts
             if (account instanceof Customer) {
                 Customer customer = (Customer) account;
-                System.out.println("Address: " + customer.getAddress());
-                System.out.println("Date of Birth: " + customer.getDateOfBirth());
-                System.out.println("License Number: " + customer.getLicenseNumber());
-                System.out.println("Emergency Contact: " + customer.getEmergencyContact());
+                System.out.printf("║ %-30s ║ %-30s ║\n", "Address", customer.getAddress());
+                System.out.printf("║ %-30s ║ %-30s ║\n", "Date of Birth", customer.getDateOfBirth());
+                System.out.printf("║ %-30s ║ %-30s ║\n", "License Number", customer.getLicenseNumber());
+                System.out.printf("║ %-30s ║ %-30s ║\n", "Emergency Contact", customer.getEmergencyContact());
+                System.out.println("╚════════════════════════════════╩════════════════════════════════╝");
 
                 System.out.println("\n=== Which information would you like to modify? ===");
                 System.out.println("1. Full Name");
@@ -882,6 +880,7 @@ public class AccountService {
                 System.out.println("5. Emergency Contact");
             } else {
                 // For Admin accounts, show simpler options
+                System.out.println("╚════════════════════════════════╩════════════════════════════════╝");
                 System.out.println("\n=== Which information would you like to modify? ===");
                 System.out.println("1. Full Name");
                 System.out.println("2. Contact Number");
@@ -1036,9 +1035,6 @@ public class AccountService {
         }
     }
 
-    /**
-     * Update email address with verification
-     */
     public static void updateEmailAddress(Scanner scanner, Account account) {
         clearScreen();
         System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
@@ -1166,7 +1162,7 @@ public class AccountService {
 
         for (int i = 0; i < allAccounts.size(); i++) {
             Account acc = allAccounts.get(i);
-            System.out.printf("│ %-3d │ %-11s │ %-19s │ %-8s │ %-25s │ %-19s │%n",
+            System.out.printf("│ %-3d │ %-11s │ %-19s │ %-8s │ %-25s │ %-19s │\n",
                     (i + 1),
                     acc.getUsername().length() > 11 ? acc.getUsername().substring(0, 11) : acc.getUsername(),
                     acc.getFullName().length() > 19 ? acc.getFullName().substring(0, 19) : acc.getFullName(),
@@ -1298,30 +1294,31 @@ public class AccountService {
         while (true) {
             clearScreen();
             System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
-            System.out.println("║                      MANAGE ACCOUNT                              ║");
+            System.out.println("║                          MANAGE ACCOUNT                          ║");
             System.out.println("╚══════════════════════════════════════════════════════════════════╝");
 
-            System.out.println("Account Information:");
-            System.out.println("Username: " + account.getUsername());
-            System.out.println("Role: " + account.getRole());
+            System.out.println("╔════════════════════════════════╦════════════════════════════════╗");
+            System.out.printf("║ %-30s ║ %-30s ║\n", "Username", account.getUsername());
+            System.out.printf("║ %-30s ║ %-30s ║\n", "Role", account.getRole());
 
             if (account instanceof Admin) {
                 Admin admin = (Admin) account;
-                System.out.println("Admin ID: " + admin.getAdminId());
+                System.out.printf("║ %-30s ║ %-30s ║\n", "Admin ID", admin.getAdminId());
             }
 
-            System.out.println("Full Name: " + account.getFullName());
-            System.out.println("Email: " + account.getEmail());
-            System.out.println("Contact Number: " + account.getContactNumber());
+            System.out.printf("║ %-30s ║ %-30s ║\n", "Full Name", account.getFullName());
+            System.out.printf("║ %-30s ║ %-30s ║\n", "Email", account.getEmail());
+            System.out.printf("║ %-30s ║ %-30s ║\n", "Contact Number", account.getContactNumber());
 
             if (account instanceof Customer) {
                 Customer customer = (Customer) account;
-                System.out.println("Address: " + customer.getAddress());
-                System.out.println("Date of Birth: " + customer.getDateOfBirth());
-                System.out.println("License Number: " + customer.getLicenseNumber());
-                System.out.println("Emergency Contact: " + customer.getEmergencyContact());
+                System.out.printf("║ %-30s ║ %-30s ║\n", "Address", customer.getAddress());
+                System.out.printf("║ %-30s ║ %-30s ║\n", "Date of Birth", customer.getDateOfBirth());
+                System.out.printf("║ %-30s ║ %-30s ║\n", "License Number", customer.getLicenseNumber());
+                System.out.printf("║ %-30s ║ %-30s ║\n", "Emergency Contact", customer.getEmergencyContact());
             }
 
+            System.out.println("╚════════════════════════════════╩════════════════════════════════╝");
             System.out.println("\n=== What would you like to do? ===");
             System.out.println("1. Modify Account Information");
             System.out.println("2. Delete Account");
@@ -1349,9 +1346,6 @@ public class AccountService {
         }
     }
 
-    /**
-     * Add new user account (admin function)
-     */
     public static void addNewUserAccount(Scanner scanner) {
         clearScreen();
         System.out.println("\n");
@@ -1684,7 +1678,7 @@ public class AccountService {
             scanner.nextLine();
             return false;
         }
-        
+
         if (adminUsername.equals(account.getUsername())) {
             System.out.println("Error: You cannot delete your own account!");
             System.out.println("Press Enter to continue...");

@@ -9,9 +9,6 @@ import static services.UtilityService.*;
 
 public class AdminService extends AccountService {
 
-    /**
-     * Get all admin accounts
-     */
     public static List<Account> getAdminAccounts() {
         List<Account> admins = new ArrayList<>();
         for (Account account : getAccounts()) {
@@ -22,29 +19,24 @@ public class AdminService extends AccountService {
         return admins;
     }
 
-    /**
-     * Admin user management interface
-     */
     public static void manageUsers(Scanner scanner) {
         adminUserManagement(scanner);
     }
 
-    /**
-     * Admin vehicle management interface
-     */
     public static void manageVehicles(Scanner scanner) {
         while (true) {
-            System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
+            clearScreen();
+            System.out.println("╔══════════════════════════════════════════════════════════════════╗");
             System.out.println("║                      VEHICLE MANAGEMENT                          ║");
             System.out.println("╠══════════════════════════════════════════════════════════════════╣");
-            System.out.println("║ 1. View All Vehicles                                            ║");
-            System.out.println("║ 2. Add New Vehicle                                              ║");
-            System.out.println("║ 3. Update Vehicle Information                                   ║");
-            System.out.println("║ 4. Manage Vehicle Status                                        ║");
-            System.out.println("║ 5. Archive Vehicle                                              ║");
-            System.out.println("║ 6. Restore Archived Vehicle                                     ║");
-            System.out.println("║ 7. Vehicle Search                                               ║");
-            System.out.println("║ 0. Back to Admin Menu                                           ║");
+            System.out.println("║ 1. View All Vehicles                                             ║");
+            System.out.println("║ 2. Add New Vehicle                                               ║");
+            System.out.println("║ 3. Update Vehicle Information                                    ║");
+            System.out.println("║ 4. Manage Vehicle Status                                         ║");
+            System.out.println("║ 5. Archive Vehicle                                               ║");
+            System.out.println("║ 6. Restore Archived Vehicle                                      ║");
+            System.out.println("║ 7. Vehicle Search                                                ║");
+            System.out.println("║ 0. Back to Admin Menu                                            ║");
             System.out.println("╚══════════════════════════════════════════════════════════════════╝");
             System.out.print("Select option: ");
 
@@ -83,9 +75,6 @@ public class AdminService extends AccountService {
         }
     }
 
-    /**
-     * Search vehicles (admin function)
-     */
     private static void searchVehicles(Scanner scanner) {
         System.out.println("\n=== VEHICLE SEARCH ===");
         System.out.print("Enter search term (brand, model, plate, or leave empty for all): ");
@@ -101,7 +90,7 @@ public class AdminService extends AccountService {
         if (results.isEmpty()) {
             System.out.println("No vehicles found matching your search.");
         } else {
-            System.out.printf("\nFound %d vehicle(s):%n", results.size());
+            System.out.printf("\nFound %d vehicle(s):\n", results.size());
             vehicleService.displaySearchResults(results);
         }
 
@@ -109,39 +98,46 @@ public class AdminService extends AccountService {
         scanner.nextLine();
     }
 
-    /**
-     * Admin business operations interface
-     */
-    public static void businessOperations(Scanner scanner) {
+    public static void reportsAndAnalytics(RentalSystem system, Scanner scanner) {
         while (true) {
-            System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
-            System.out.println("║                    BUSINESS OPERATIONS                           ║");
+            System.out.println("\n");
+            System.out.println("╔══════════════════════════════════════════════════════════════════╗");
+            System.out.println("║                      REPORTS & ANALYTICS                         ║");
             System.out.println("╠══════════════════════════════════════════════════════════════════╣");
-            System.out.println("║ 1. View Business Reports                                        ║");
-            System.out.println("║ 2. Export Reports                                               ║");
-            System.out.println("║ 3. System Statistics                                            ║");
-            System.out.println("║ 4. Revenue Analysis                                             ║");
-            System.out.println("║ 0. Back to Admin Menu                                           ║");
+            System.out.println("║ 1. Monthly Report                                                ║");
+            System.out.println("║ 2. Popular Vehicle Report                                        ║");
+            System.out.println("║ 3. Customer Report                                               ║");
+            System.out.println("║ 4. System Report                                                 ║");
+            System.out.println("║ 0. Back to Admin Menu                                            ║");
             System.out.println("╚══════════════════════════════════════════════════════════════════╝");
             System.out.print("Select option: ");
 
             String choice = scanner.nextLine();
+            
+            // Create ReportManager instance
+            RentalHistoryManager rentalHistoryManager = new RentalHistoryManager();
+            for (Rental rental : system.getRentals()) {
+                rentalHistoryManager.addRental(rental);
+            }
+            ReportManager reportManager = new ReportManager(rentalHistoryManager);
+            
             switch (choice) {
                 case "1":
-                    viewBusinessReports();
-                    System.out.println("Press Enter to continue...");
-                    scanner.nextLine();
+                    reportManager.runMonthlyReport(scanner);
                     break;
                 case "2":
-                    exportReports(scanner);
+                    reportManager.runPopularVehicleReport(scanner);
                     break;
                 case "3":
-                    showSystemStatistics();
+                    reportManager.runCustomerReport();
                     System.out.println("Press Enter to continue...");
                     scanner.nextLine();
                     break;
                 case "4":
-                    analyzeRevenue();
+                    List<Customer> customers = CustomerService.getCustomerAccounts().stream()
+                        .map(account -> (Customer) account)
+                        .collect(java.util.stream.Collectors.toList());
+                    reportManager.runSystemReport(vehicleService.getVehicles(), customers);
                     System.out.println("Press Enter to continue...");
                     scanner.nextLine();
                     break;
@@ -153,95 +149,6 @@ public class AdminService extends AccountService {
                     scanner.nextLine();
             }
         }
-    }
-
-    /**
-     * View business reports
-     */
-    private static void viewBusinessReports() {
-        System.out.println("\n=== BUSINESS REPORTS ===");
-
-        // Vehicle statistics
-        List<Vehicle> allVehicles = vehicleService.getVehicles();
-        long totalVehicles = allVehicles.size();
-        long availableVehicles = allVehicles.stream()
-                .filter(v -> "available".equalsIgnoreCase(v.getStatus()))
-                .count();
-        long rentedVehicles = allVehicles.stream()
-                .filter(v -> "rented".equalsIgnoreCase(v.getStatus()))
-                .count();
-        long outOfServiceVehicles = allVehicles.stream()
-                .filter(v -> "out_of_service".equalsIgnoreCase(v.getStatus()))
-                .count();
-
-        System.out.println("Vehicle Statistics:");
-        System.out.printf("  Total Vehicles: %d%n", totalVehicles);
-        System.out.printf("  Available: %d%n", availableVehicles);
-        System.out.printf("  Rented: %d%n", rentedVehicles);
-        System.out.printf("  Out of Service: %d%n", outOfServiceVehicles);
-
-        // Account statistics
-        List<Account> allAccounts = getAccounts();
-        long totalAccounts = allAccounts.size();
-        long customerAccounts = allAccounts.stream()
-                .filter(a -> a.getRole() == AccountRole.CUSTOMER)
-                .count();
-        long adminAccounts = allAccounts.stream()
-                .filter(a -> a.getRole() == AccountRole.ADMIN)
-                .count();
-
-        System.out.println("\nAccount Statistics:");
-        System.out.printf("  Total Accounts: %d%n", totalAccounts);
-        System.out.printf("  Customers: %d%n", customerAccounts);
-        System.out.printf("  Administrators: %d%n", adminAccounts);
-    }
-
-    /**
-     * Export reports
-     */
-    private static void exportReports(Scanner scanner) {
-        System.out.println("\n=== EXPORT REPORTS ===");
-        System.out.println("1. Export Vehicle Report");
-        System.out.println("2. Export Account Report");
-        System.out.println("3. Export Rental Report");
-        System.out.println("0. Cancel");
-        System.out.print("Select report type: ");
-
-        String choice = scanner.nextLine();
-        switch (choice) {
-            case "1":
-                System.out.println("Vehicle report export functionality coming soon...");
-                break;
-            case "2":
-                System.out.println("Account report export functionality coming soon...");
-                break;
-            case "3":
-                System.out.println("Rental report export functionality coming soon...");
-                break;
-            case "0":
-                return;
-            default:
-                System.out.println("Invalid option.");
-        }
-
-        System.out.println("Press Enter to continue...");
-        scanner.nextLine();
-    }
-
-    /**
-     * Show system statistics
-     */
-    private static void showSystemStatistics() {
-        System.out.println("\n=== SYSTEM STATISTICS ===");
-        System.out.println("Detailed system statistics functionality coming soon...");
-    }
-
-    /**
-     * Analyze revenue
-     */
-    private static void analyzeRevenue() {
-        System.out.println("\n=== REVENUE ANALYSIS ===");
-        System.out.println("Revenue analysis functionality coming soon...");
     }
 
     public static void manageAdminProfile(Scanner scanner, Account adminAccount) {
@@ -291,21 +198,23 @@ public class AdminService extends AccountService {
     }
 
     private static void displayAdminProfile(Account adminAccount) {
-        System.out.println("\n");
-        System.out.println("==========================================");
-        System.out.println("              ADMIN PROFILE           ");
-        System.out.println("==========================================");
+    System.out.println("\n");
+    System.out.println("╔══════════════════════════════════════════════════════════════════╗");
+    System.out.println("║                        ADMIN PROFILE                             ║");
+    System.out.println("╚══════════════════════════════════════════════════════════════════╝");
 
-        System.out.printf("%-20s : %s\n", "Username", adminAccount.getUsername());
+    System.out.println("╔════════════════════════════════╦════════════════════════════════╗");
+    System.out.printf("║ %-30s ║ %-30s ║\n", "Username", adminAccount.getUsername());
 
-        if (adminAccount instanceof Admin) {
-            Admin admin = (Admin) adminAccount;
-            System.out.printf("%-20s : %s\n", "Admin ID", admin.getAdminId());
-        }
-
-        System.out.printf("%-20s : %s\n", "Full Name", adminAccount.getFullName());
-        System.out.printf("%-20s : %s\n", "Email", adminAccount.getEmail());
-        System.out.printf("%-20s : %s\n", "Contact Number", adminAccount.getContactNumber());
-        System.out.printf("%-20s : %s\n", "Role", adminAccount.getRole());
+    if (adminAccount instanceof Admin) {
+        Admin admin = (Admin) adminAccount;
+        System.out.printf("║ %-30s ║ %-30s ║\n", "Admin ID", admin.getAdminId());
     }
+
+    System.out.printf("║ %-30s ║ %-30s ║\n", "Full Name", adminAccount.getFullName());
+    System.out.printf("║ %-30s ║ %-30s ║\n", "Email", adminAccount.getEmail());
+    System.out.printf("║ %-30s ║ %-30s ║\n", "Contact Number", adminAccount.getContactNumber());
+    System.out.printf("║ %-30s ║ %-30s ║\n", "Role", adminAccount.getRole());
+    System.out.println("╚════════════════════════════════╩════════════════════════════════╝");
+}
 }

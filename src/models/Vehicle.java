@@ -1,15 +1,14 @@
 package models;
 
-import java.util.Map;
-import java.util.List;
+import enums.VehicleStatus;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.time.LocalDate;
-
-import models.Booking;
-import enums.VehicleStatus;
+import java.util.List;
+import java.util.Map;
 
 public class Vehicle {
+
     private String vehicleID;
     private String plateNo;
     private String carBrand;
@@ -23,15 +22,15 @@ public class Vehicle {
     private double insuranceRate;
     private VehicleStatus status; // Enum-backed vehicle status
     private boolean archived; // true = archived, false = active
-    
-    private double basePrice; 
-    private Map<Integer, Double> longTermDiscounts;
-    private List<Booking> schedule; 
-    private static final int BUFFER_DAYS = 2; 
 
-    public Vehicle(String vehicleID, String plateNo, String carBrand, String carModel, 
-                   String carType, String fuelType, String color, int purchaseYear, 
-                   double capacity, String condition, double insuranceRate, String available) {
+    private double basePrice;
+    private Map<Integer, Double> longTermDiscounts;
+    private List<Booking> schedule;
+    private static final int BUFFER_DAYS = 2;
+
+    public Vehicle(String vehicleID, String plateNo, String carBrand, String carModel,
+            String carType, String fuelType, String color, int purchaseYear,
+            double capacity, String condition, double insuranceRate, String available) {
         this.vehicleID = vehicleID;
         this.plateNo = plateNo;
         this.carBrand = carBrand;
@@ -44,103 +43,168 @@ public class Vehicle {
         this.condition = condition;
         this.insuranceRate = insuranceRate;
         this.status = parseStatus(available);
-        this.archived = false; 
-        
+        this.archived = false;
 
         this.basePrice = 50.0;
         this.longTermDiscounts = new HashMap<>();
         this.schedule = new ArrayList<>();
     }
 
-
-    public Vehicle(String vehicleID, String plateNo, String carBrand, String carModel, 
-                   String carType, String fuelType, String color, int purchaseYear, 
-                   double capacity, String condition, double insuranceRate, String available,
-                   double basePrice, Map<Integer, Double> longTermDiscounts) {
-        this(vehicleID, plateNo, carBrand, carModel, carType, fuelType, color, 
-             purchaseYear, capacity, condition, insuranceRate, available);
+    public Vehicle(String vehicleID, String plateNo, String carBrand, String carModel,
+            String carType, String fuelType, String color, int purchaseYear,
+            double capacity, String condition, double insuranceRate, String available,
+            double basePrice, Map<Integer, Double> longTermDiscounts) {
+        this(vehicleID, plateNo, carBrand, carModel, carType, fuelType, color,
+                purchaseYear, capacity, condition, insuranceRate, available);
         this.basePrice = basePrice;
         this.longTermDiscounts = longTermDiscounts != null ? longTermDiscounts : new HashMap<>();
     }
 
-
-    public void setColor(String color) { this.color = color; }
-    public void setCondition(String condition) { this.condition = condition; }
-    public void setInsuranceRate(double insuranceRate) { this.insuranceRate = insuranceRate; }
-    public void setAvailable(String available) { this.status = parseStatus(available); }
-    public void setArchived(boolean archived) { this.archived = archived; }
-    public void setBasePrice(double basePrice) { this.basePrice = basePrice; }
-    public void setLongTermDiscounts(Map<Integer, Double> longTermDiscounts) { 
-        this.longTermDiscounts = longTermDiscounts != null ? longTermDiscounts : new HashMap<>(); 
+    public void setColor(String color) {
+        this.color = color;
     }
 
+    public void setCondition(String condition) {
+        this.condition = condition;
+    }
 
-    public String getVehicleID() { return vehicleID; }
-    public String getPlateNo() { return plateNo; }
-    public String getBrand() { return carBrand; }
-    public String getModel() { return carModel; }
-    public String getType() { return carType; }
-    public String getFuelType() { return fuelType; }
-    public String getColor() { return color; }
-    public int getYear() { return purchaseYear; }
-    public double getCapacity() { return capacity; }
-    public String getCondition() { return condition; }
-    public double getInsuranceRate() { return insuranceRate; }
-    public String getAvailable() { return statusToString(status); }
-    public boolean isArchived() { return archived; }
-    public double getBasePrice() { return basePrice; }
-    public Map<Integer, Double> getLongTermDiscounts() { return longTermDiscounts; }
-    public List<Booking> getSchedule() { return schedule; }
+    public void setInsuranceRate(double insuranceRate) {
+        this.insuranceRate = insuranceRate;
+    }
 
+    public void setAvailable(String available) {
+        this.status = parseStatus(available);
+    }
 
-    public int getId() { 
+    public void setArchived(boolean archived) {
+        this.archived = archived;
+    }
+
+    public void setBasePrice(double basePrice) {
+        this.basePrice = basePrice;
+    }
+
+    public void setLongTermDiscounts(Map<Integer, Double> longTermDiscounts) {
+        this.longTermDiscounts = longTermDiscounts != null ? longTermDiscounts : new HashMap<>();
+    }
+
+    public String getVehicleID() {
+        return vehicleID;
+    }
+
+    public String getPlateNo() {
+        return plateNo;
+    }
+
+    public String getBrand() {
+        return carBrand;
+    }
+
+    public String getModel() {
+        return carModel;
+    }
+
+    public String getType() {
+        return carType;
+    }
+
+    public String getFuelType() {
+        return fuelType;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public int getYear() {
+        return purchaseYear;
+    }
+
+    public double getCapacity() {
+        return capacity;
+    }
+
+    public String getCondition() {
+        return condition;
+    }
+
+    public double getInsuranceRate() {
+        return insuranceRate;
+    }
+
+    public String getAvailable() {
+        return statusToString(status);
+    }
+
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public double getBasePrice() {
+        return basePrice;
+    }
+
+    public Map<Integer, Double> getLongTermDiscounts() {
+        return longTermDiscounts;
+    }
+
+    public List<Booking> getSchedule() {
+        return schedule;
+    }
+
+    public int getId() {
         try {
             return Integer.parseInt(vehicleID);
         } catch (NumberFormatException e) {
             return vehicleID.hashCode();
         }
     }
-    
 
-    public String getCarPlate() { return plateNo; }
-    
+    public String getCarPlate() {
+        return plateNo;
+    }
 
-    public String getVehicleType() { return carType; }
-    
+    public String getVehicleType() {
+        return carType;
+    }
 
-    public String getStatus() { return statusToString(status); }
+    public String getStatus() {
+        return statusToString(status);
+    }
 
-    public VehicleStatus getVehicleStatus() { return status; }
+    public VehicleStatus getVehicleStatus() {
+        return status;
+    }
 
-    public void setStatus(String status) { this.status = parseStatus(status); }
+    public void setStatus(String status) {
+        this.status = parseStatus(status);
+    }
 
-    public void setVehicleStatus(VehicleStatus status) { this.status = status; }
+    public void setVehicleStatus(VehicleStatus status) {
+        this.status = status;
+    }
 
     public boolean isAvailable(LocalDate startDate, LocalDate endDate) {
-        
+
         if (status != VehicleStatus.AVAILABLE) {
             return false;
         }
-        
-        
+
         for (Booking booking : schedule) {
             LocalDate bufferStart = booking.getStartDate().minusDays(BUFFER_DAYS);
             LocalDate bufferEnd = booking.getEndDate().plusDays(BUFFER_DAYS);
-            
+
             if (overlapsWithBuffer(startDate, endDate, bufferStart, bufferEnd)) {
                 return false;
             }
         }
         return true;
     }
-    
+
     private boolean overlapsWithBuffer(LocalDate start1, LocalDate end1, LocalDate start2, LocalDate end2) {
         return !start1.isAfter(end2) && !start2.isAfter(end1);
     }
-    
-    /**
-     * add booking
-     */
+
     public void addBooking(LocalDate startDate, LocalDate endDate) {
         if (isAvailable(startDate, endDate)) {
             schedule.add(new Booking(startDate, endDate));
@@ -148,18 +212,12 @@ public class Vehicle {
             throw new IllegalArgumentException("Vehicle is not available for the requested period");
         }
     }
-    
-    /**
-     * remove booking
-     */
+
     public void removeBooking(LocalDate startDate, LocalDate endDate) {
-        schedule.removeIf(booking -> 
-            booking.getStartDate().equals(startDate) && booking.getEndDate().equals(endDate));
+        schedule.removeIf(booking
+                -> booking.getStartDate().equals(startDate) && booking.getEndDate().equals(endDate));
     }
-    
-    /**
-     * check if there are future bookings
-     */
+
     public boolean hasFutureBookings() {
         LocalDate today = LocalDate.now();
         for (Booking booking : schedule) {
@@ -169,10 +227,7 @@ public class Vehicle {
         }
         return false;
     }
-    
-    /**
-     * get next booking
-     */
+
     public Booking getNextBooking() {
         LocalDate today = LocalDate.now();
         Booking nextBooking = null;
@@ -185,24 +240,18 @@ public class Vehicle {
         }
         return nextBooking;
     }
-    
-    /**
-     * clear all bookings
-     */
+
     public void clearAllBookings() {
         schedule.clear();
     }
-    
-    /**
-     * get unavailable periods
-     */
+
     public List<String> getUnavailablePeriods() {
         List<String> periods = new ArrayList<>();
         for (Booking booking : schedule) {
             LocalDate bufferStart = booking.getStartDate().minusDays(BUFFER_DAYS);
             LocalDate bufferEnd = booking.getEndDate().plusDays(BUFFER_DAYS);
-            periods.add(String.format("%s to %s (includes %d-day buffer)", 
-                       bufferStart, bufferEnd, BUFFER_DAYS));
+            periods.add(String.format("%s to %s (includes %d-day buffer)",
+                    bufferStart, bufferEnd, BUFFER_DAYS));
         }
         return periods;
     }
@@ -234,11 +283,11 @@ public class Vehicle {
         }
         schedule.add(new Booking(startDate, endDate));
     }
-    
+
     private boolean overlapsDirectly(LocalDate start1, LocalDate end1, LocalDate start2, LocalDate end2) {
         return !start1.isAfter(end2) && !start2.isAfter(end1);
     }
-    
+
     /**
      * get discount rate for rental days
      */
@@ -252,18 +301,20 @@ public class Vehicle {
         return maxDiscount;
     }
 
-
-
     @Override
     public String toString() {
         return String.format(
-            "VehicleID: %s, %s %s | Type: %s | Fuel: %s | Color: %s | Year: %d | Engine Capacity: %.2f | Condition: %s | Rate: RM%.2f/day | Status: %s",
-            vehicleID, carBrand, carModel, carType, fuelType, color, purchaseYear, capacity, condition, basePrice, statusToString(status)
+                "║ %-8s %-10s %-10s %-12s %-15s %-8s %-10s %-6d %-8.1f %-10s %-12.2f %-12s ║",
+                vehicleID, plateNo, carBrand, carModel, carType,
+                fuelType, color, purchaseYear, capacity,
+                condition, basePrice, statusToString(status)
         );
     }
 
     private static VehicleStatus parseStatus(String value) {
-        if (value == null) return VehicleStatus.AVAILABLE;
+        if (value == null) {
+            return VehicleStatus.AVAILABLE;
+        }
         String v = value.trim().toLowerCase();
         switch (v) {
             case "available":
@@ -282,7 +333,9 @@ public class Vehicle {
     }
 
     private static String statusToString(VehicleStatus status) {
-        if (status == null) return "available";
+        if (status == null) {
+            return "available";
+        }
         switch (status) {
             case AVAILABLE:
                 return "available";
@@ -296,4 +349,4 @@ public class Vehicle {
                 return "available";
         }
     }
-} 
+}

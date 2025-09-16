@@ -10,25 +10,16 @@ public class Admin extends Account {
     private String adminId;
     private static int nextAdminNumber = 1;
 
-    /**
-     * Constructor with basic admin information
-     */
     public Admin(String username, String password) {
         super(username, password, AccountRole.ADMIN);
         this.adminId = generateAdminId();
     }
 
-    /**
-     * Constructor with email
-     */
     public Admin(String username, String password, String email) {
         super(username, password, AccountRole.ADMIN, email);
         this.adminId = generateAdminId();
     }
 
-    /**
-     * Constructor with full information
-     */
     public Admin(String username, String password, String email, String fullName,
                 String contactNumber) {
         super(username, password, AccountRole.ADMIN, email, fullName, contactNumber);

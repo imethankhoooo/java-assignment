@@ -51,6 +51,23 @@
     "longTermDiscounts": {"7": 0.1, "14": 0.16}
   },
   {
+    "vehicleID": "F1011",
+    "plateNo": "WAT2938",
+    "brand": "Perodua",
+    "model": "Myvi",
+    "type": "Hatchback",
+    "fuelType": "Petrol",
+    "color": "Green",
+    "year": 2017,
+    "capacity": 1.3,
+    "condition": "New",
+    "insuranceRate": 0.1,
+    "availability": "available",
+    "archived": false,
+    "basePrice": 50.0,
+    "longTermDiscounts": {}
+  },
+  {
     "vehicleID": "F1008",
     "plateNo": "VID6262",
     "brand": "Proton",

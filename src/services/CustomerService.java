@@ -157,7 +157,6 @@ public class CustomerService extends AccountService {
 
         while (true) {
             clearScreen();
-            System.out.println("\n");
             System.out.println("╔══════════════════════════════════════════════════════════════════╗");
             System.out.println("║                         CUSTOMER PROFILE                         ║");
             System.out.println("╠══════════════════════════════════════════════════════════════════╣");
@@ -197,21 +196,24 @@ public class CustomerService extends AccountService {
     }
 
     private static void displayCustomerProfile(Account customerAccount) {
-        System.out.println("\n");
-        System.out.println("=====================================");
-        System.out.println("            CUSTOMER PROFILE          ");
-        System.out.println("=====================================");
-        System.out.printf("%-20s : %s\n", "Username", customerAccount.getUsername());
-        System.out.printf("%-20s : %s\n", "Full Name", customerAccount.getFullName());
-        System.out.printf("%-20s : %s\n", "Email", customerAccount.getEmail());
-        System.out.printf("%-20s : %s\n", "Contact Number", customerAccount.getContactNumber());
+        System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
+        System.out.println("║                        CUSTOMER PROFILE                          ║");
+        System.out.println("╚══════════════════════════════════════════════════════════════════╝");
+
+        System.out.println("╔════════════════════════════════╦════════════════════════════════╗");
+        System.out.printf("║ %-30s ║ %-30s ║%n", "Username", customerAccount.getUsername());
+        System.out.printf("║ %-30s ║ %-30s ║%n", "Full Name", customerAccount.getFullName());
+        System.out.printf("║ %-30s ║ %-30s ║%n", "Email", customerAccount.getEmail());
+        System.out.printf("║ %-30s ║ %-30s ║%n", "Contact Number", customerAccount.getContactNumber());
 
         if (customerAccount instanceof Customer) {
             Customer customer = (Customer) customerAccount;
-            System.out.printf("%-20s : %s\n", "Address", customer.getAddress());
-            System.out.printf("%-20s : %s\n", "Date of Birth", customer.getDateOfBirth());
-            System.out.printf("%-20s : %s\n", "License Number", customer.getLicenseNumber());
-            System.out.printf("%-20s : %s\n", "Emergency Contact", customer.getEmergencyContact());
+            System.out.printf("║ %-30s ║ %-30s ║%n", "Address", customer.getAddress());
+            System.out.printf("║ %-30s ║ %-30s ║%n", "Date of Birth", customer.getDateOfBirth());
+            System.out.printf("║ %-30s ║ %-30s ║%n", "License Number", customer.getLicenseNumber());
+            System.out.printf("║ %-30s ║ %-30s ║%n", "Emergency Contact", customer.getEmergencyContact());
         }
+
+        System.out.println("╚════════════════════════════════╩════════════════════════════════╝");
     }
 }

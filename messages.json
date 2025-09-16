@@ -16,7 +16,7 @@
     "sender": "admin",
     "recipient": "user1",
     "subject": "Rental Approved - PDF Ticket Attached - City",
-    "content": "Excellent news! Your rental request for City has been approved!\\nYour rental ticket has been generated: TKT-20250902105212-6E94A4DD\\nA beautiful PDF ticket has been sent to your email with all the details.\\nIMPORTANT: Please save the PDF ticket. You will need it for vehicle pickup.\\nPickup Instructions:\\n- Bring valid government-issued ID\\n- Present your PDF ticket (digital or printed copy)\\n- Arrive 15 minutes before rental start time\\n- Vehicle inspection will be conducted before handover\\nCheck your email for the complete PDF ticket!",
+    "content": "Excellent news! Your rental request for City has been approved!\\\\nYour rental ticket has been generated: TKT-20250902105212-6E94A4DD\\\\nA beautiful PDF ticket has been sent to your email with all the details.\\\\nIMPORTANT: Please save the PDF ticket. You will need it for vehicle pickup.\\\\nPickup Instructions:\\\\n- Bring valid government-issued ID\\\\n- Present your PDF ticket (digital or printed copy)\\\\n- Arrive 15 minutes before rental start time\\\\n- Vehicle inspection will be conducted before handover\\\\nCheck your email for the complete PDF ticket!",
     "type": "RENTAL_APPROVAL",
     "timestamp": "2025-09-02 10:52:12",
     "isRead": true,
@@ -34,5 +34,17 @@
     "isRead": true,
     "relatedRentalId": "",
     "emailSent": true
+  },
+  {
+    "id": "MSG1758003553858_635",
+    "sender": "admin",
+    "recipient": "user1",
+    "subject": "Rental Approved - PDF Ticket Attached - City",
+    "content": "Excellent news! Your rental request for City has been approved!\nYour rental ticket has been generated: TKT-20250916141913-5AC80688\nA beautiful PDF ticket has been sent to your email with all the details.\nIMPORTANT: Please save the PDF ticket. You will need it for vehicle pickup.\nPickup Instructions:\n- Bring valid government-issued ID\n- Present your PDF ticket (digital or printed copy)\n- Arrive 15 minutes before rental start time\n- Vehicle inspection will be conducted before handover\nCheck your email for the complete PDF ticket!",
+    "type": "RENTAL_APPROVAL",
+    "timestamp": "2025-09-16 14:19:13",
+    "isRead": false,
+    "relatedRentalId": "1",
+    "emailSent": false
   }
 ]

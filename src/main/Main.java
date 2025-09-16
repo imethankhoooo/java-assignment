@@ -152,7 +152,8 @@ public class Main {
             System.out.println("║  2. Vehicle Management                                           ║");
             System.out.println("║  3. Booking Management                                           ║");
             System.out.println("║  4. Payment Management                                           ║");
-            System.out.println("║  5. Admin Profile Management                                     ║");
+            System.out.println("║  5. Reports & Analytics                                          ║");
+            System.out.println("║  6. Admin Profile Management                                     ║");
             System.out.println("║  0. Logout                                                       ║");
             System.out.println("╚══════════════════════════════════════════════════════════════════╝");
             System.out.print("Select option: ");
@@ -172,6 +173,9 @@ public class Main {
                     paymentManagementMenu(system, scanner, currentAccount);
                     break;
                 case "5":
+                    AdminService.reportsAndAnalytics(system, scanner);
+                    break;
+                case "6":
                     AdminService.manageAdminProfile(scanner, currentAccount);
                     break;
                 case "0":

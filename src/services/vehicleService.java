@@ -9,7 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.time.LocalDate; 
+import java.time.LocalDate;
 import java.util.HashMap;
 
 import models.*;
@@ -17,8 +17,8 @@ import enums.*;
 
 import static services.UtilityService.*;
 
-
 public class vehicleService {
+
     private static List<Vehicle> vehicles = new ArrayList<Vehicle>();
     private static List<Rental> rentals = new ArrayList<>();
     
@@ -51,6 +51,7 @@ public class vehicleService {
     public static List<Vehicle> getVehicles() {
         return vehicles;
     }
+
     /**
      * Load vehicle data from JSON file
      */
@@ -65,14 +66,16 @@ public class vehicleService {
 
             vehicles = parseVehiclesFromJson(jsonContent.toString());
             System.out.println("Loaded vehicles: " + vehicles.size());
-            if (vehicles == null)
+            if (vehicles == null) {
                 vehicles = new ArrayList<>();
+            }
         } catch (IOException e) {
             System.out.println("Failed to load vehicle data: " + e.getMessage());
             vehicles = new ArrayList<>();
         }
     }
-     /**
+
+    /**
      * Parse vehicle JSON data
      */
     public static List<Vehicle> parseVehiclesFromJson(String json) {
@@ -96,7 +99,8 @@ public class vehicleService {
         }
         return vehicleList;
     }
-     /**
+
+    /**
      * Parse single vehicle object
      */
     public static Vehicle parseVehicleFromJson(String json) {
@@ -109,20 +113,20 @@ public class vehicleService {
             String type = extractJsonValue(json, "type");
             String fuelType = extractJsonValue(json, "fuelType");
             String color = extractJsonValue(json, "color");
-            
+
             String yearStr = extractJsonValue(json, "year");
             int year = Integer.parseInt(yearStr);
-            
+
             String capacityStr = extractJsonValue(json, "capacity");
             double capacity = Double.parseDouble(capacityStr);
-            
+
             String condition = extractJsonValue(json, "condition");
-            
+
             String insuranceRateStr = extractJsonValue(json, "insuranceRate");
             double insuranceRate = Double.parseDouble(insuranceRateStr);
-            
+
             String availability = extractJsonValue(json, "availability");
-            
+
             String archivedStr = extractJsonValue(json, "archived");
             boolean archived = Boolean.parseBoolean(archivedStr);
 
@@ -145,8 +149,8 @@ public class vehicleService {
                 }
             }
 
-            Vehicle vehicle = new Vehicle(vehicleID, plateNo, brand, model, type, fuelType, color, year, 
-                             capacity, condition, insuranceRate, availability, basePrice, discounts);
+            Vehicle vehicle = new Vehicle(vehicleID, plateNo, brand, model, type, fuelType, color, year,
+                    capacity, condition, insuranceRate, availability, basePrice, discounts);
             vehicle.setArchived(archived);
             return vehicle;
         } catch (Exception e) {
@@ -155,23 +159,23 @@ public class vehicleService {
         return null;
     }
 
-    
     public static void setVehicles(List<Vehicle> vehicleList) {
         vehicles = vehicleList;
     }
-    
+
     public static void setRentals(List<Rental> rentalList) {
         rentals = rentalList;
     }
+
     public static List<Vehicle> performSearch(List<Vehicle> vehicles, String query) {
         List<Vehicle> results = new ArrayList<>();
-        
+
         // Remove parentheses and process the inner content
         query = query.trim();
         if (query.startsWith("(") && query.endsWith(")")) {
             query = query.substring(1, query.length() - 1).trim();
         }
-        
+
         // If query contains OR operator
         if (query.contains(" or ")) {
             String[] orTerms = query.split(" or ");
@@ -185,8 +189,7 @@ public class vehicleService {
                     }
                 }
             }
-        }
-        // Handle AND operator
+        } // Handle AND operator
         else if (query.contains(" and ")) {
             String[] andTerms = query.split(" and ");
             for (Vehicle vehicle : vehicles) {
@@ -201,8 +204,7 @@ public class vehicleService {
                     results.add(vehicle);
                 }
             }
-        }
-        // Single search term
+        } // Single search term
         else {
             for (Vehicle vehicle : vehicles) {
                 if (matchesVehicle(vehicle, query)) {
@@ -210,46 +212,42 @@ public class vehicleService {
                 }
             }
         }
-        
+
         return results;
     }
-     /**
-     * Display severity level guidance
-     */
 
-    
     // Admin functions - Display all vehicles (Active and Archived)
     public static void displayAllVehicles() {
         List<Vehicle> vehicles = getVehicles();
-        
-        //Active Vehicles: Available / Rented
-        System.out.println("\n╔═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗");
-        System.out.println("║                                                                        Active Vehicles                                                                      ║");
-        System.out.println("╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣");
-        System.out.printf("║ %-13s %-12s %-10s %-10s %-13s %-10s %-10s %-15s %-12s %-12s %-15s %-11s ║%n",
+
+        //Active Vehicles: Available / Reserved
+        System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗");
+        System.out.println("║                                                                        Active Vehicles                                                                         ║");
+        System.out.println("╠════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣");
+        System.out.printf("║ %-13s %-12s %-10s %-10s %-13s %-10s %-10s %-15s %-12s %-12s %-15s %-15s ║\n",
                 "VehicleID", "PlateNo", "Brand", "Model", "Type", "Fuel", "Color", "PurchaseYear", "Capacity", "Condition", "InsuranceRate", "Availability");
-        System.out.println("╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣");
-        
+        System.out.println("╠════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣");
+
         for (Vehicle v : vehicles) {
             if (!v.isArchived()) {
-                System.out.printf("║ %-13s %-12s %-10s %-10s %-13s %-10s %-10s %-15d %-12.1f %-12s %-15.2f %-12s ║%n",
-                        v.getVehicleID(), v.getPlateNo(), v.getBrand(), v.getModel(), v.getType(), v.getFuelType(), v.getColor(), 
+                System.out.printf("║ %-13s %-12s %-10s %-10s %-13s %-10s %-10s %-15d %-12.1f %-12s %-15.2f %-15s ║\n",
+                        v.getVehicleID(), v.getPlateNo(), v.getBrand(), v.getModel(), v.getType(), v.getFuelType(), v.getColor(),
                         v.getYear(), v.getCapacity(), v.getCondition(), v.getInsuranceRate(), v.getAvailable());
             }
         }
-        System.out.println("╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝\n");
+        System.out.println("╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝\n");
 
         //Archived Vehicles
         System.out.println("╔═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗");
         System.out.println("║                                                               Archived Vehicles                                                               ║");
         System.out.println("╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣");
-        System.out.printf("║ %-13s %-12s %-10s %-10s %-13s %-10s %-10s %-15s %-12s %-12s %-14s ║%n",
+        System.out.printf("║ %-13s %-12s %-10s %-10s %-13s %-10s %-10s %-15s %-12s %-12s %-14s ║\n",
                 "VehicleID", "PlateNo", "Brand", "Model", "Type", "Fuel", "Color", "PurchaseYear", "Capacity", "Condition", "InsuranceRate");
         System.out.println("╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣");
 
         for (Vehicle v : vehicles) {
             if (v.isArchived()) {
-                System.out.printf("║ %-13s %-12s %-10s %-10s %-13s %-10s %-10s %-15d %-12.1f %-12s %-14.2f ║%n",
+                System.out.printf("║ %-13s %-12s %-10s %-10s %-13s %-10s %-10s %-15d %-12.1f %-12s %-14.2f ║\n",
                         v.getVehicleID(), v.getPlateNo(), v.getBrand(), v.getModel(), v.getType(), v.getFuelType(),
                         v.getColor(), v.getYear(), v.getCapacity(), v.getCondition(), v.getInsuranceRate());
             }
@@ -260,52 +258,55 @@ public class vehicleService {
     // Customer functionality: Display available vehicles
     public static void displayAvailableVehicles() {
         List<Vehicle> vehicles = getVehicles();
-        
+
         // Sort vehicles by brand, then model, then type
         vehicles.sort(java.util.Comparator.comparing(Vehicle::getBrand, String.CASE_INSENSITIVE_ORDER)
                 .thenComparing(Vehicle::getModel, String.CASE_INSENSITIVE_ORDER)
                 .thenComparing(Vehicle::getType, String.CASE_INSENSITIVE_ORDER));
-        
-        System.out.println("\n╔═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗");
-        System.out.println("║                                                 Available Vehicles                                                ║");
-        System.out.println("╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣");
-        System.out.printf("║ %-14s %-10s %-10s %-13s %-10s %-10s %-12s %-12s %-14s %-11s ║%n",
-                "PlateNo", "Brand", "Model", "Type", "Fuel", "Color", "Capacity", "Condition", "InsuranceRate", "Availability");
-        System.out.println("╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣");
 
-            for (Vehicle v : vehicles) {
+        System.out.println("\n");
+        System.out.println("╔═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗");
+        System.out.println("║                                                          Available Vehicles                                                       ║");
+        System.out.println("╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣");
+        System.out.printf("║ %-14s %-10s %-10s %-13s %-10s %-10s %-12s %-12s %-14s %-15s ║\n",
+                "PlateNo", "Brand", "Model", "Type", "Fuel", "Color", "Capacity", "Condition", "InsuranceRate", "Availability");
+        System.out.println("╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣");
+
+        for (Vehicle v : vehicles) {
             if (!v.isArchived()) {
-                System.out.printf("║ %-14s %-10s %-10s %-13s %-10s %-10s %-12.1f %-12s %-14.2f %-11s ║%n",
+                System.out.printf("║ %-14s %-10s %-10s %-13s %-10s %-10s %-12.1f %-12s %-14.2f %-15s ║\n",
                         v.getPlateNo(), v.getBrand(), v.getModel(), v.getType(), v.getFuelType(),
                         v.getColor(), v.getCapacity(), v.getCondition(), v.getInsuranceRate(), v.getAvailable());
             }
         }
-        System.out.println("╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝\n");
+        System.out.println("╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝\n");
     }
 
     // Display search results in new format
     public static void displaySearchResults(List<Vehicle> vehicles) {
         if (vehicles.isEmpty()) {
             System.out.println("No vehicles found matching your search criteria.");
-                return;
+            return;
         }
-        
-        System.out.println("\n╔═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗");
+
+        System.out.println("\n");
+        System.out.println("╔═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗");
         System.out.println("║                                                                        Search Results                                                                       ║");
-        System.out.println("╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣");
-        System.out.printf("║ %-13s %-12s %-10s %-10s %-13s %-10s %-10s %-15s %-12s %-12s %-15s %-11s ║%n",
+        System.out.println("╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣");
+        System.out.printf("║ %-13s %-12s %-10s %-10s %-13s %-10s %-10s %-15s %-12s %-12s %-15s %-12s ║\n",
                 "VehicleID", "PlateNo", "Brand", "Model", "Type", "Fuel", "Color", "PurchaseYear", "Capacity", "Condition", "InsuranceRate", "Availability");
-        System.out.println("╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣");
+        System.out.println("╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣");
 
         for (Vehicle v : vehicles) {
             if (!v.isArchived()) { // Only show non-archived vehicles in search results
-                System.out.printf("║ %-13s %-12s %-10s %-10s %-13s %-10s %-10s %-15d %-12.1f %-12s %-15.2f %-12s ║%n",
-                        v.getVehicleID(), v.getPlateNo(), v.getBrand(), v.getModel(), v.getType(), v.getFuelType(), v.getColor(), 
+                System.out.printf("║ %-13s %-12s %-10s %-10s %-13s %-10s %-10s %-15d %-12.1f %-12s %-15.2f %-12s ║\n",
+                        v.getVehicleID(), v.getPlateNo(), v.getBrand(), v.getModel(), v.getType(), v.getFuelType(), v.getColor(),
                         v.getYear(), v.getCapacity(), v.getCondition(), v.getInsuranceRate(), v.getStatus());
             }
         }
-        System.out.println("╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝\n");
+        System.out.println("╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝\n");
     }
+
     public static void addNewVehicle(RentalSystem system, Scanner scanner) {
         while(true){
             System.out.println("\nAdding New Vehicle...");
@@ -438,10 +439,10 @@ public class vehicleService {
                     continue;
                 }
 
-                System.out.print("Car Availability (available/rented): ");
+                System.out.print("Car Availability (available/reserved): ");
                 String available = capitalLetter(scanner.nextLine().trim());
-                if (!available.equalsIgnoreCase("available") && !available.equalsIgnoreCase("rented")) {
-                    System.out.println("Error: Availability must be 'available' or 'rented'.");
+                if (!available.equalsIgnoreCase("available") && !available.equalsIgnoreCase("reserved")) {
+                    System.out.println("Error: Availability must be 'available' or 'reserved'.");
                     continue;
                 }
                 
@@ -481,13 +482,13 @@ public class vehicleService {
         // Save vehicles after adding
         saveVehicles("vehicles.json");
     }
-    
-    // Manage vehicle status
+
     public static void manageVehicleStatus(RentalSystem system, Scanner scanner) {
-        System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
+        System.out.println("\n");
+        System.out.println("╔══════════════════════════════════════════════════════════════════╗");
         System.out.println("║                    MANAGE VEHICLE STATUS                         ║");
         System.out.println("╚══════════════════════════════════════════════════════════════════╝");
-        
+
         displayAllVehicles();
         
         System.out.print("\nEnter vehicle plate number or vehicle ID to manage: ");
@@ -500,39 +501,40 @@ public class vehicleService {
             scanner.nextLine();
             return;
         }
-            
-            System.out.printf("\nCurrent Status: %s\n", vehicle.getStatus());
-            System.out.println("\nAvailable Actions:");
-            System.out.println("1. Set to AVAILABLE");
-            System.out.println("2. Set to OUT_OF_SERVICE");
-            System.out.println("0. Cancel");
-            System.out.print("Select action: ");
-            
-            String choice = scanner.nextLine();
-            switch (choice) {
-                case "1":
-                    vehicle.setStatus("available");
-                    saveVehicles("vehicles.json");
-                    System.out.println("Vehicle status changed to AVAILABLE.");
-                    break;
-                case "2":
-                    vehicle.setStatus("out_of_service");
-                    saveVehicles("vehicles.json");
-                    System.out.println("Vehicle status changed to OUT_OF_SERVICE.");
-                    break;
-                case "0":
-                    System.out.println("Operation cancelled.");
-                    break;
-                default:
-                    System.out.println("Invalid option.");
-            }
-        
+
+        System.out.printf("\nCurrent Status: %s\n", vehicle.getStatus());
+        System.out.println("\nAvailable Actions:");
+        System.out.println("1. Set to AVAILABLE");
+        System.out.println("2. Set to OUT_OF_SERVICE");
+        System.out.println("0. Cancel");
+        System.out.print("Select action: ");
+
+        String choice = scanner.nextLine();
+        switch (choice) {
+            case "1":
+                vehicle.setStatus("available");
+                saveVehicles("vehicles.json");
+                System.out.println("Vehicle status changed to AVAILABLE.");
+                break;
+            case "2":
+                vehicle.setStatus("out_of_service");
+                saveVehicles("vehicles.json");
+                System.out.println("Vehicle status changed to OUT_OF_SERVICE.");
+                break;
+            case "0":
+                System.out.println("Operation cancelled.");
+                break;
+            default:
+                System.out.println("Invalid option.");
+        }
+
         System.out.println("Press Enter to continue...");
         scanner.nextLine();
     }
 
     /**
      * Update vehicle information
+     *
      * @param system RentalSystem instance
      * @param scanner Scanner for user input
      */
@@ -540,7 +542,7 @@ public class vehicleService {
         System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
         System.out.println("║                      UPDATE VEHICLE                              ║");
         System.out.println("╚══════════════════════════════════════════════════════════════════╝");
-        
+
         displayAllVehicles();
         
         System.out.print("\nEnter vehicle plate number or vehicle ID to update: ");
@@ -553,10 +555,10 @@ public class vehicleService {
             scanner.nextLine();
             return;
         }
-        
+
         System.out.println("\nCurrent Vehicle Information:");
         System.out.println(vehicle.toString());
-        
+
         System.out.println("\nWhat would you like to update?");
         System.out.println("1. Base Price");
         System.out.println("2. Color");
@@ -564,7 +566,7 @@ public class vehicleService {
         System.out.println("4. Insurance Rate");
         System.out.println("0. Cancel");
         System.out.print("Select option: ");
-        
+
         String choice = scanner.nextLine();
         switch (choice) {
             case "1":
@@ -618,7 +620,7 @@ public class vehicleService {
                 System.out.println("Invalid option.");
                 return;
         }
-        
+
         saveVehicles("vehicles.json");
         System.out.println("Press Enter to continue...");
         scanner.nextLine();
@@ -626,42 +628,46 @@ public class vehicleService {
 
     /**
      * Archive a vehicle
+     *
      * @param system RentalSystem instance
      * @param scanner Scanner for user input
      */
     public static void archiveVehicle(RentalSystem system, Scanner scanner) {
-        System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
-        System.out.println("║                      ARCHIVE VEHICLE                             ║");
-        System.out.println("╚══════════════════════════════════════════════════════════════════╝");
-        
         // Show only active vehicles
         List<Vehicle> activeVehicles = vehicles.stream()
                 .filter(v -> !v.isArchived())
                 .collect(java.util.stream.Collectors.toList());
-        
+
         if (activeVehicles.isEmpty()) {
             System.out.println("No active vehicles to archive.");
             System.out.println("Press Enter to continue...");
             scanner.nextLine();
             return;
         }
-        
-        System.out.println("Active Vehicles:");
+
+        System.out.println("╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗");
+        System.out.println("║                                                     Active Vehicles                                                                  ║");
+        System.out.println("╠══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣");
+        System.out.printf("║ %-8s %-10s %-10s %-12s %-15s %-8s %-10s %-6s %-8s %-10s %-12s %-12s║\n",
+                "VehicleID", "PlateNo", "Brand", "Model", "Type", "Fuel", "Color",
+                "Year", "Capacity", "Condition", "Rate(RM)", "Availability");
+        System.out.println("║══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════║");
+
         for (Vehicle v : activeVehicles) {
-            System.out.println(v.toString());
+            System.out.println(v);
         }
-        
-        System.out.print("\nEnter vehicle plate number or vehicle ID to archive: ");
-        String searchTerm = scanner.nextLine().trim();
-        Vehicle vehicle = findVehicleByPlateNo(searchTerm);
-        
+        System.out.println("╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝");
+        System.out.print("\nEnter vehicle plate number to archive: ");
+        String plateNo = scanner.nextLine().trim();
+        Vehicle vehicle = findVehicleByPlateNo(plateNo);
+
         if (vehicle == null || vehicle.isArchived()) {
             System.out.println("Vehicle not found or already archived.");
             System.out.println("Press Enter to continue...");
             scanner.nextLine();
             return;
         }
-        
+
         // Check if vehicle has future bookings
         if (vehicle.hasFutureBookings()) {
             System.out.println("Warning: This vehicle has future bookings!");
@@ -674,15 +680,15 @@ public class vehicleService {
                 scanner.nextLine();
                 return;
             }
-            
+
             // Clear all bookings
             vehicle.clearAllBookings();
         }
-        
+
         vehicle.setArchived(true);
         vehicle.setStatus("archived");
         saveVehicles("vehicles.json");
-        
+
         System.out.println("Vehicle archived successfully.");
         System.out.println("Press Enter to continue...");
         scanner.nextLine();
@@ -690,6 +696,7 @@ public class vehicleService {
 
     /**
      * Restore an archived vehicle
+     *
      * @param system RentalSystem instance
      * @param scanner Scanner for user input
      */
@@ -697,40 +704,40 @@ public class vehicleService {
         System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
         System.out.println("║                    RESTORE ARCHIVED VEHICLE                      ║");
         System.out.println("╚══════════════════════════════════════════════════════════════════╝");
-        
+
         // Show only archived vehicles
         List<Vehicle> archivedVehicles = vehicles.stream()
                 .filter(Vehicle::isArchived)
                 .collect(java.util.stream.Collectors.toList());
-        
+
         if (archivedVehicles.isEmpty()) {
             System.out.println("No archived vehicles to restore.");
             System.out.println("Press Enter to continue...");
             scanner.nextLine();
             return;
         }
-        
+
         System.out.println("Archived Vehicles:");
         for (Vehicle v : archivedVehicles) {
-            System.out.printf("ID: %s, Plate: %s, %s %s [ARCHIVED]\n", 
+            System.out.printf("ID: %s, Plate: %s, %s %s [ARCHIVED]\n",
                     v.getVehicleID(), v.getPlateNo(), v.getBrand(), v.getModel());
         }
-        
-        System.out.print("\nEnter vehicle plate number or vehicle ID to restore: ");
-        String searchTerm = scanner.nextLine().trim();
-        Vehicle vehicle = findVehicleByPlateNo(searchTerm);
-        
+
+        System.out.print("\nEnter vehicle plate number to restore: ");
+        String plateNo = scanner.nextLine().trim();
+        Vehicle vehicle = findVehicleByPlateNo(plateNo);
+
         if (vehicle == null || !vehicle.isArchived()) {
             System.out.println("Vehicle not found or not archived.");
             System.out.println("Press Enter to continue...");
             scanner.nextLine();
             return;
         }
-        
+
         vehicle.setArchived(false);
         vehicle.setStatus("available");
         saveVehicles("vehicles.json");
-        
+
         System.out.println("Vehicle restored successfully and set to AVAILABLE status.");
         System.out.println("Press Enter to continue...");
         scanner.nextLine();
@@ -798,8 +805,10 @@ public class vehicleService {
         json.append("]");
         return json.toString();
     }
+
     /**
-     * Check vehicle availability for a specific period (including buffer period)
+     * Check vehicle availability for a specific period (including buffer
+     * period)
      */
     public static boolean isVehicleAvailable(int vehicleId, LocalDate startDate, LocalDate endDate) {
         Vehicle vehicle = findVehicleById(vehicleId);
@@ -817,8 +826,8 @@ public class vehicleService {
 
         // Get all active and pending rentals
         for (Rental rental : rentals) {
-            if (rental.getVehicle().getId() == vehicleId &&
-                    (rental.getStatus() == RentalStatus.ACTIVE || rental.getStatus() == RentalStatus.PENDING)) {
+            if (rental.getVehicle().getId() == vehicleId
+                    && (rental.getStatus() == RentalStatus.ACTIVE || rental.getStatus() == RentalStatus.PENDING)) {
 
                 LocalDate bufferStart = rental.getStartDate().minusDays(2);
                 LocalDate bufferEnd = rental.getEndDate().plusDays(2);
@@ -873,9 +882,9 @@ public class vehicleService {
         return null;
     }
 
-
     /**
      * Search vehicles by car plate number
+     *
      * @param carPlate Car plate number to search
      * @return List of vehicles matching the car plate
      */
@@ -896,6 +905,7 @@ public class vehicleService {
 
     /**
      * Search vehicles by brand
+     *
      * @param brand Brand name to search
      * @return List of vehicles matching the brand
      */
@@ -916,6 +926,7 @@ public class vehicleService {
 
     /**
      * Search vehicles by model
+     *
      * @param model Model name to search
      * @return List of vehicles matching the model
      */
@@ -936,6 +947,7 @@ public class vehicleService {
 
     /**
      * Search vehicles by vehicle type
+     *
      * @param vehicleType Type of vehicle to search
      * @return List of vehicles matching the type
      */
@@ -955,6 +967,7 @@ public class vehicleService {
 
     /**
      * Search vehicles by fuel type
+     *
      * @param fuelType Fuel type to search
      * @return List of vehicles matching the fuel type
      */
@@ -974,6 +987,7 @@ public class vehicleService {
 
     /**
      * Comprehensive search - can search by multiple conditions
+     *
      * @param carPlate Car plate filter
      * @param brand Brand filter
      * @param model Model filter
@@ -1034,6 +1048,7 @@ public class vehicleService {
 
     /**
      * Quick search for vehicles by keyword
+     *
      * @param keyword Search keyword
      * @param onlyAvailable Only show available vehicles
      * @return List of vehicles matching the keyword
@@ -1053,11 +1068,11 @@ public class vehicleService {
             }
 
             // Search in brand, model, car plate, and type
-            boolean matches = vehicle.getBrand().toLowerCase().contains(searchTerm) ||
-                             vehicle.getModel().toLowerCase().contains(searchTerm) ||
-                             vehicle.getCarPlate().toLowerCase().contains(searchTerm) ||
-                             vehicle.getVehicleType().toString().toLowerCase().contains(searchTerm) ||
-                             vehicle.getFuelType().toString().toLowerCase().contains(searchTerm);
+            boolean matches = vehicle.getBrand().toLowerCase().contains(searchTerm)
+                    || vehicle.getModel().toLowerCase().contains(searchTerm)
+                    || vehicle.getCarPlate().toLowerCase().contains(searchTerm)
+                    || vehicle.getVehicleType().toString().toLowerCase().contains(searchTerm)
+                    || vehicle.getFuelType().toString().toLowerCase().contains(searchTerm);
 
             if (matches) {
                 results.add(vehicle);
@@ -1068,6 +1083,7 @@ public class vehicleService {
 
     /**
      * Get all available vehicles
+     *
      * @return List of available vehicles
      */
     public static List<Vehicle> getAvailableVehicles() {
@@ -1082,6 +1098,7 @@ public class vehicleService {
 
     /**
      * Find vehicle by ID (search version)
+     *
      * @param id Vehicle ID to find
      * @return Vehicle object if found, null otherwise
      */
@@ -1096,6 +1113,7 @@ public class vehicleService {
 
     /**
      * Get conflict details for a vehicle booking
+     *
      * @param vehicleId Vehicle ID
      * @param startDate Start date
      * @param endDate End date
@@ -1114,7 +1132,7 @@ public class vehicleService {
 
         StringBuilder details = new StringBuilder();
         details.append("Vehicle ").append(vehicle.getBrand()).append(" ").append(vehicle.getModel())
-               .append(" (").append(vehicle.getCarPlate()).append(") has the following bookings:\n");
+                .append(" (").append(vehicle.getCarPlate()).append(") has the following bookings:\n");
 
         for (String conflict : conflicts) {
             details.append("- ").append(conflict).append("\n");
@@ -1125,6 +1143,7 @@ public class vehicleService {
 
     /**
      * Check if a vehicle has booking conflicts
+     *
      * @param vehicleId Vehicle ID
      * @param startDate Start date
      * @param endDate End date
@@ -1141,6 +1160,7 @@ public class vehicleService {
 
     /**
      * Check if a vehicle matches search terms
+     *
      * @param vehicle Vehicle to check
      * @param term Search term
      * @return true if vehicle matches the search term
@@ -1152,13 +1172,11 @@ public class vehicleService {
 
         term = term.toUpperCase().trim();
 
-        return vehicle.getBrand().toUpperCase().contains(term) ||
-                vehicle.getModel().toUpperCase().contains(term) ||
-                vehicle.getCarPlate().toUpperCase().contains(term) ||
-                vehicle.getVehicleType().toString().toUpperCase().contains(term) ||
-                vehicle.getFuelType().toString().toUpperCase().contains(term);
+        return vehicle.getBrand().toUpperCase().contains(term)
+                || vehicle.getModel().toUpperCase().contains(term)
+                || vehicle.getCarPlate().toUpperCase().contains(term)
+                || vehicle.getVehicleType().toString().toUpperCase().contains(term)
+                || vehicle.getFuelType().toString().toUpperCase().contains(term);
     }
-
-
 
 }

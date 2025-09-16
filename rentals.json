@@ -1,2 +1,37 @@
 [
+  {
+    "id": 1,
+    "fee": 336.0,
+    "actualFee": 0.0,
+    "insurance": true,
+    "status": "ACTIVE",
+    "startDate": "2025-09-16",
+    "endDate": "2025-09-20",
+    "customer": {
+      "name": "Ethan Khoo Tsui Ern",
+      "contact": "60125252524"
+    },
+    "vehicle": {
+      "id": 66153895,
+      "brand": "Honda",
+      "model": "City",
+      "carPlate": "WMR1235",
+      "vehicleType": "Sedan",
+      "fuelType": "Petrol",
+      "status": "reserved",
+      "insuranceRate": 0.12,
+      "basePrice": 60.0,
+      "longTermDiscounts": {"7": 0.08,"14": 0.12}
+    },
+    "username": "user1",
+    "dueSoonReminderSent": false,
+    "overdueReminderSent": false,
+    "ticket": {
+      "ticketId": "TKT-20250916141913-5AC80688",
+      "generatedTime": "2025-09-16T14:19:13.592757",
+      "pickupLocation": "Main Office - Vehicle Rental Center",
+      "specialInstructions": "Please bring valid ID and this ticket for vehicle pickup",
+      "isUsed": false
+    }
+  }
 ]

@@ -207,7 +207,7 @@ public class TicketService {
         
         int index = 1;
         for (Ticket ticket : tickets.values()) {
-            System.out.printf("\n%d. %s\n", index++, (ticket.isUsed() ? "🔴 [USED]" : "🟢 [VALID]"));
+            System.out.printf("\n%d. %s\n", index++, (ticket.isUsed() ? "[USED]" : "[VALID]"));
             System.out.println("┌──────────────────────────────────────────────────────────────────┐");
             System.out.printf("│ Ticket ID: %-53s │%n", ticket.getTicketId());
             System.out.printf("│ Rental ID: %-53d │%n", ticket.getRentalId());

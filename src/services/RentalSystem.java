@@ -1,15 +1,11 @@
 package services;
 
-import java.util.*;
-
 import enums.*;
-import models.*;
-import main.*;
-
 import java.io.*;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-
+import java.util.*;
+import models.*;
 import static services.UtilityService.*;
 
 /**
@@ -1821,11 +1817,11 @@ public class RentalSystem {
                     rental.getVehicle().getPlateNo(),
                     rental.getVehicle().getBrand(), 
                     rental.getVehicle().getModel());
-                if (vehicleInfo.length() > 23) {
-                    vehicleInfo = vehicleInfo.substring(0, 20) + "...";
+                if (vehicleInfo.length() > 25) {
+                    vehicleInfo = vehicleInfo.substring(0, 24) + "...";
                 }
                 
-                System.out.printf("│ %-3d │ %-11s │ %-23s │ %-11s │ %-11s │ RM%-9.2f │%n",
+                System.out.printf("│ %-3d │ %-11s │ %-24s │ %-11s │ %-11s │ RM%-9.2f │%n",
                         rental.getId(),
                         rental.getUsername() != null
                                 ? (rental.getUsername().length() > 11 ? rental.getUsername().substring(0, 11)
@@ -1836,7 +1832,7 @@ public class RentalSystem {
                         rental.getEndDate().toString(),
                         rental.getTotalFee());
             }
-            System.out.println("└─────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────┘");
+            System.out.println("└─────┴─────────────┴─────────────────────────┴─────────────┴─────────────┴─────────────┘");
 
             System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
             System.out.println("║                           OPTIONS                                ║");
@@ -1896,33 +1892,6 @@ public class RentalSystem {
         }
     }
 
-    // Reports and analytics (merge functionality)
-    public static void reportsAndAnalytics(RentalSystem system, Scanner scanner) {
-        while (true) {
-            System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
-            System.out.println("║                      REPORTS & ANALYTICS                         ║");
-            System.out.println("╠══════════════════════════════════════════════════════════════════╣");
-            System.out.println("║ 1. View Statistics                                               ║");
-            System.out.println("║ 2. Generate Detailed Report                                      ║");
-            System.out.println("║ 0. Back to Main Menu                                             ║");
-            System.out.println("╚══════════════════════════════════════════════════════════════════╝");
-            System.out.print("Select option: ");
-
-            String choice = scanner.nextLine();
-            switch (choice) {
-                case "1":
-                    Main.viewStatistics(system, scanner);
-                    break;
-                case "2":
-                    generateDetailedReport(system, scanner);
-                    break;
-                case "0":
-                    return;
-                default:
-                    System.out.println("Invalid option. Please try again.");
-            }
-        }
-    }
 
     // Generate detailed report
     public static void generateDetailedReport(RentalSystem system, Scanner scanner) {
@@ -2516,11 +2485,10 @@ public class RentalSystem {
             System.out.println("║  2. View All Rentals                                             ║");
             System.out.println("║  3. Rental Management (Pending/Approve/Reject)                   ║");
             System.out.println("║  4. Confirm Vehicle Return                                       ║");
-            System.out.println("║  5. Reports & Analytics                                          ║");
-            System.out.println("║  6. View Reminders                                               ║");
-            System.out.println("║  7. Ticket Management                                            ║");
-            System.out.println("║  8. Message Center                                               ║");
-            System.out.println("║  9. Offline Booking (Walk-in Customers)                          ║");
+            System.out.println("║  5. View Reminders                                               ║");
+            System.out.println("║  6. Ticket Management                                            ║");
+            System.out.println("║  7. Message Center                                               ║");
+            System.out.println("║  8. Offline Booking (Walk-in Customers)                          ║");
             System.out.println("║  0. Back to Main Menu                                            ║");
             System.out.println("╚══════════════════════════════════════════════════════════════════╝");
             System.out.print("Select option: ");
@@ -2546,21 +2514,18 @@ public class RentalSystem {
                     scanner.nextLine();
                     break;
                 case "5":
-                    reportsAndAnalytics(system, scanner);
-                    break;
-                case "6":
                     ReminderService reminderService = new ReminderService(system);
                     reminderService.displayReminderSummary();
                     System.out.println("\nPress Enter to continue...");
                     scanner.nextLine();
                     break;
-                case "7":
+                case "6":
                     ticketManagement(system, scanner);
                     break;
-                case "8":
+                case "7":
                     MessageService.messageCenter(system, scanner, "admin");
                     break;
-                case "9":
+                case "8":
                     RentalSystem.offlineBooking(system, scanner);
                     break;
                 case "0":
