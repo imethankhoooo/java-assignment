@@ -5,9 +5,6 @@ import java.util.List;
 import java.util.Map;
 import models.*;
 
-/**
- * Ticket Service - manages rental confirmation tickets
- */
 public class TicketService {
     private Map<String, Ticket> tickets; // ticketId -> Ticket
     private Map<String, List<Ticket>> customerTickets; // customerName -> List of tickets
@@ -185,9 +182,6 @@ public class TicketService {
         return stats;
     }
     
-    /**
-     * Admin function: Display all tickets
-     */
     public void displayAllTickets() {
         if (tickets.isEmpty()) {
             System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
@@ -219,9 +213,6 @@ public class TicketService {
         }
     }
     
-    /**
-     * Check if customer has valid tickets
-     */
     public boolean hasValidTickets(String customerName) {
         return !getValidCustomerTickets(customerName).isEmpty();
     }

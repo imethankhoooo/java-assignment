@@ -1,12 +1,12 @@
 package services;
 import java.io.*;
 import java.net.*;
-import java.util.Base64;
-import java.util.Properties;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.Date;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.net.ssl.*;
 
 public class EmailService {
@@ -374,10 +374,10 @@ public class EmailService {
             "• Save the PDF ticket to your phone\n" +
             "• All details are in the attached PDF\n" +
             "• Contact us if you need assistance\n\n" +
-            "Thank you for choosing Premium Vehicle Rental!\n" +
+            "Thank you for choosing CarSeekl!\n" +
             "Your journey, our priority. \n\n" +
             "Best regards,\n" +
-            "Premium Vehicle Rental Team\n" +
+            "CarkSeek Vehicle Rental Team\n" +
             " support@premiumrental.com |  +1-800-RENTAL",
             username, vehicleModel, ticketId, vehicleModel
         );
@@ -395,7 +395,7 @@ public class EmailService {
             "Please contact us if you have any questions or would like to make alternative arrangements.\n" +
             "Thank you for your understanding.\n" +
             "Best regards,\n" +
-            "Rental Management System",
+            "CarkSeek Vehicle Rental Team",
             username, vehicleModel, reason
         );
         

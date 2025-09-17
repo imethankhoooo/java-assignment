@@ -114,30 +114,27 @@ public class AdminService extends AccountService {
 
             String choice = scanner.nextLine();
             
-            // Create ReportManager instance
-            RentalHistoryManager rentalHistoryManager = new RentalHistoryManager();
-            for (Rental rental : system.getRentals()) {
-                rentalHistoryManager.addRental(rental);
-            }
-            ReportManager reportManager = new ReportManager(rentalHistoryManager);
+            // Use system's rental data directly instead of creating new RentalHistoryManager
+            List<Rental> rentals = system.getRentals();
             
             switch (choice) {
                 case "1":
-                    reportManager.runMonthlyReport(scanner);
+                    ReportService.generateMonthlyReport(rentals, scanner);
                     break;
                 case "2":
-                    reportManager.runPopularVehicleReport(scanner);
+                    ReportService.generatePopularVehicleReport(rentals, scanner);
                     break;
                 case "3":
-                    reportManager.runCustomerReport();
+                    ReportService.generateCustomerReport(rentals);
                     System.out.println("Press Enter to continue...");
                     scanner.nextLine();
                     break;
                 case "4":
                     List<Customer> customers = CustomerService.getCustomerAccounts().stream()
+                        .filter(account -> account instanceof Customer)
                         .map(account -> (Customer) account)
                         .collect(java.util.stream.Collectors.toList());
-                    reportManager.runSystemReport(vehicleService.getVehicles(), customers);
+                    ReportService.generateSystemReport(rentals, vehicleService.getVehicles(), customers);
                     System.out.println("Press Enter to continue...");
                     scanner.nextLine();
                     break;

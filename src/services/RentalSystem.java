@@ -227,17 +227,22 @@ public class RentalSystem {
             json.append("      \"contact\": \"").append(customer.getContact()).append("\"\n");
             json.append("    },\n");
 
-            // Vehicle information
+            // Vehicle information - using field names expected by vehicleService.parseVehicleFromJson
             Vehicle vehicle = rental.getVehicle();
             json.append("    \"vehicle\": {\n");
-            json.append("      \"id\": ").append(vehicle.getId()).append(",\n");
+            json.append("      \"vehicleID\": \"").append(vehicle.getVehicleID()).append("\",\n");
+            json.append("      \"plateNo\": \"").append(vehicle.getPlateNo()).append("\",\n");
             json.append("      \"brand\": \"").append(vehicle.getBrand()).append("\",\n");
             json.append("      \"model\": \"").append(vehicle.getModel()).append("\",\n");
-            json.append("      \"carPlate\": \"").append(vehicle.getCarPlate()).append("\",\n");
-            json.append("      \"vehicleType\": \"").append(vehicle.getVehicleType()).append("\",\n");
+            json.append("      \"type\": \"").append(vehicle.getType()).append("\",\n");
             json.append("      \"fuelType\": \"").append(vehicle.getFuelType()).append("\",\n");
-            json.append("      \"status\": \"").append(vehicle.getStatus()).append("\",\n");
+            json.append("      \"color\": \"").append(vehicle.getColor()).append("\",\n");
+            json.append("      \"year\": ").append(vehicle.getYear()).append(",\n");
+            json.append("      \"capacity\": ").append(vehicle.getCapacity()).append(",\n");
+            json.append("      \"condition\": \"").append(vehicle.getCondition()).append("\",\n");
             json.append("      \"insuranceRate\": ").append(vehicle.getInsuranceRate()).append(",\n");
+            json.append("      \"availability\": \"").append(vehicle.getStatus()).append("\",\n");
+            json.append("      \"archived\": ").append(vehicle.isArchived()).append(",\n");
             json.append("      \"basePrice\": ").append(vehicle.getBasePrice()).append(",\n");
             json.append("      \"longTermDiscounts\": {");
 
@@ -1794,9 +1799,9 @@ public class RentalSystem {
     // Rental management (merge approval and rejection functionality)
     public static void rentalManagement(RentalSystem system, Scanner scanner) {
         while (true) {
-            System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
-            System.out.println("║                       RENTAL MANAGEMENT                          ║");
-            System.out.println("╚══════════════════════════════════════════════════════════════════╝");
+            System.out.println("\n╔═══════════════════════════════════════════════════════════════════════════════════╗");
+            System.out.println("║                                 RENTAL MANAGEMENT                                 ║");
+            System.out.println("╚═══════════════════════════════════════════════════════════════════════════════════╝");
 
             List<Rental> pendingRentals = system.getPendingRentals();
             if (pendingRentals.isEmpty()) {
@@ -1807,9 +1812,9 @@ public class RentalSystem {
             }
 
             System.out.println("\nPending Rentals:");
-            System.out.println("┌─────┬─────────────┬─────────────────────────┬─────────────┬─────────────┬─────────────┐");
-            System.out.println("│ ID  │ User        │ Vehicle                 │ Start Date  │ End Date    │ Fee         │");
-            System.out.println("├─────┼─────────────┼─────────────────────────┼─────────────┼─────────────┼─────────────┤");
+            System.out.println("┌─────┬─────────────┬──────────────────────────────────┬─────────────┬─────────────┬─────────────┐");
+            System.out.println("│ ID  │ User        │ Vehicle                          │ Start Date  │ End Date    │ Fee         │");
+            System.out.println("├─────┼─────────────┼──────────────────────────────────┼─────────────┼─────────────┼─────────────┤");
 
             for (Rental rental : pendingRentals) {
                 // Create vehicle info with plate number and brand/model
@@ -1832,7 +1837,7 @@ public class RentalSystem {
                         rental.getEndDate().toString(),
                         rental.getTotalFee());
             }
-            System.out.println("└─────┴─────────────┴─────────────────────────┴─────────────┴─────────────┴─────────────┘");
+            System.out.println("└─────┴─────────────┴──────────────────────────────────┴─────────────┴─────────────┴─────────────┘");
 
             System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
             System.out.println("║                           OPTIONS                                ║");
@@ -1892,8 +1897,6 @@ public class RentalSystem {
         }
     }
 
-
-    // Generate detailed report
     public static void generateDetailedReport(RentalSystem system, Scanner scanner) {
         System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
         System.out.println("║                    DETAILED REPORT OPTIONS                       ║");

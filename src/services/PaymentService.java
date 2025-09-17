@@ -1,12 +1,12 @@
 package services;
 
+import enums.AccountRole;
 import java.io.*;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import models.Rental;
 import models.Account;
-import enums.AccountRole;
+import models.Rental;
 
 public class PaymentService {
 
@@ -321,7 +321,7 @@ public class PaymentService {
             bw.write("Final Amount    : RM" + String.format("%.2f", rental.getActualFee()) + "\n");
             bw.write("Payment Status  : PAID\n");
             bw.write("==========================================================\n");
-            bw.write("Thank you for choosing Premium Vehicle Rental!\n");
+            bw.write("Thank you for choosing CarSeek!\n");
         } catch (IOException e) {
             System.out.println("Failed to save receipt: " + e.getMessage());
         }

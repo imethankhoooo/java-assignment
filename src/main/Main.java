@@ -55,7 +55,7 @@ public class Main {
             if (currentAccount == null) {
             // Show login/register choice
             System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
-            System.out.println("║                    WELCOME TO RENTAL SYSTEM                      ║");
+            System.out.println("║                    WELCOME TO CARSEEK                            ║");
             System.out.println("╠══════════════════════════════════════════════════════════════════╣");
             System.out.println("║ 1. Login                                                         ║");
             System.out.println("║ 2. Register                                                      ║");
@@ -199,7 +199,7 @@ public class Main {
             }
             firstTime = false;
             
-            System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
+            System.out.println("╔══════════════════════════════════════════════════════════════════╗");
             System.out.println("║                          CUSTOMER PANEL                          ║");
             System.out.println("╠══════════════════════════════════════════════════════════════════╣");
             System.out.println("║ 1. Account Management                                            ║");

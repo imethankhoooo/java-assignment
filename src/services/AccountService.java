@@ -157,7 +157,6 @@ public class AccountService {
     }
 
     // Parse single account object
-    // Note: 为了向后兼容性，继续提取所有字段，但根据账户类型只使用相关字段
     private static Account parseAccountFromJson(String json) {
         try {
             String username = extractJsonValue(json, "username");
@@ -166,12 +165,10 @@ public class AccountService {
             String email = extractJsonValue(json, "email");
             String fullName = extractJsonValue(json, "fullName");
             String contactNumber = extractJsonValue(json, "contactNumber");
-            // Customer专属字段 - Admin账户将忽略这些字段
             String address = extractJsonValue(json, "address");
             String dateOfBirth = extractJsonValue(json, "dateOfBirth");
             String licenseNumber = extractJsonValue(json, "licenseNumber");
             String emergencyContact = extractJsonValue(json, "emergencyContact");
-            // Admin专属字段 - Customer账户将忽略此字段
             String adminId = extractJsonValue(json, "adminId");
 
             if (username != null && password != null && roleStr != null) {
@@ -423,9 +420,6 @@ public class AccountService {
         return results;
     }
 
-    /**
-     * Handle login process
-     */
     public static Account loginProcess(Scanner scanner) {
         System.out.println("\n=== LOGIN ===");
         while (true) {
@@ -446,15 +440,11 @@ public class AccountService {
         }
     }
 
-    /**
-     * Handle registration process
-     */
     public static void registerProcess(Scanner scanner) {
         System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
         System.out.println("║                        USER REGISTRATION                         ║");
         System.out.println("╚══════════════════════════════════════════════════════════════════╝");
 
-        // Step 1: Basic account information
         System.out.println("\n=== Step 1: Basic Account Information ===");
 
         String username;
@@ -486,8 +476,6 @@ public class AccountService {
             }
             break;
         }
-
-        // Hash the password
         password = hashPassword(password);
 
         String email;
@@ -501,7 +489,6 @@ public class AccountService {
             break;
         }
 
-        // Step 2: Personal Information
         System.out.println("\n=== Step 2: Personal Information ===");
 
         String fullName;
@@ -567,7 +554,6 @@ public class AccountService {
         System.out.print("Emergency Contact Number (optional): ");
         String emergencyContact = scanner.nextLine().trim();
 
-        // Step 3: Email Verification
         System.out.println("\n=== Step 3: Email Verification ===");
         String verificationCode = generateVerificationCode();
 
@@ -600,30 +586,20 @@ public class AccountService {
         scanner.nextLine();
     }
 
-    /**
-     * Validate email format
-     */
     public static boolean isValidEmail(String email) {
         return email != null && email.contains("@") && email.contains(".")
                 && email.indexOf("@") < email.lastIndexOf(".");
     }
 
-    /**
-     * Validate full name format (only letters and spaces)
-     */
     public static boolean isValidFullName(String fullName) {
         if (fullName == null || fullName.trim().isEmpty()) {
             return false;
         }
 
-        // Only allow letters, spaces, dots, apostrophes, and hyphens
         String namePattern = "^[a-zA-Z\\s.'\\-]+$";
         return fullName.matches(namePattern);
     }
 
-    /**
-     * Clean and validate full name input
-     */
     public static String cleanAndValidateFullName(String input) {
         if (input == null) {
             return null;
@@ -754,19 +730,17 @@ public class AccountService {
         return hashPassword(password).equals(hash);
     }
 
-    /**
-     * Send email verification code
-     */
     public static boolean sendEmailVerification(String email, String code) {
         EmailService emailService = new EmailService();
-        String subject = "Vehicle Rental System - Email Verification";
+        System.out.println("\n");
+        String subject = "CarSeek - Email Verification";
         String content = String.format(
-                "Welcome to Vehicle Rental System!\n\n"
+                "Welcome to CarSeek!\n\n"
                 + "Your verification code is: %s\n\n"
                 + "Please enter this code to complete your registration.\n\n"
                 + "This code will expire in 10 minutes.\n\n"
                 + "Best regards,\n"
-                + "Vehicle Rental System Team", code);
+                + "CarSeek Team", code);
 
         return emailService.sendEmailWithAttachment(email, subject, content, null, null);
     }
@@ -828,7 +802,7 @@ public class AccountService {
             }
 
             if (input.equals(currentCode)) {
-                System.out.println("Email verification successful!");
+                System.out.println("\nEmail verification successful!");
                 return true;
             } else {
                 attempts++;
@@ -840,9 +814,6 @@ public class AccountService {
         return false;
     }
 
-    /**
-     * View and modify account information
-     */
     public static void viewAndModifyAccountInfo(Scanner scanner, Account account) {
         while (true) {
             clearScreen();
@@ -1045,8 +1016,16 @@ public class AccountService {
 
         String newEmail;
         while (true) {
-            System.out.print("Enter new email address: ");
+            System.out.print("Enter new email address (or type 'exit' to cancel): ");
             newEmail = scanner.nextLine().trim();
+
+            if (newEmail.equalsIgnoreCase("exit")) {
+                System.out.println("Email update cancelled. Returning to menu...");
+                System.out.println("Press Enter to continue...");
+                scanner.nextLine();
+                return; // quit the session
+            }
+
             if (!isValidEmail(newEmail)) {
                 System.out.println("Please enter a valid email address.");
                 continue;
@@ -1079,9 +1058,6 @@ public class AccountService {
         scanner.nextLine();
     }
 
-    /**
-     * Change password
-     */
     public static void changePassword(Scanner scanner, Account account) {
         clearScreen();
         System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
@@ -1138,14 +1114,12 @@ public class AccountService {
         clearScreen();
     }
 
-    /**
-     * View all user accounts
-     */
     public static void viewAllUserAccounts(Scanner scanner) {
         clearScreen();
-        System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
-        System.out.println("║                        ALL USER ACCOUNTS                         ║");
-        System.out.println("╚══════════════════════════════════════════════════════════════════╝");
+
+        System.out.println("╔══════════════════════════════════════════════════════════════════════════════════════════════════════╗");
+        System.out.println("║                                          ALL USER ACCOUNTS                                           ║");
+        System.out.println("╚══════════════════════════════════════════════════════════════════════════════════════════════════════╝");
 
         List<Account> allAccounts = getAccounts();
         if (allAccounts.isEmpty()) {
@@ -1155,7 +1129,6 @@ public class AccountService {
             return;
         }
 
-        System.out.println("\n");
         System.out.println("┌─────┬─────────────┬─────────────────────┬──────────┬───────────────────────────┬─────────────────────┐");
         System.out.println("│ No. │ Username    │ Full Name           │ Role     │ Email                     │ Contact             │");
         System.out.println("├─────┼─────────────┼─────────────────────┼──────────┼───────────────────────────┼─────────────────────┤");
@@ -1669,7 +1642,7 @@ public class AccountService {
 
     public static boolean deleteSelectedAccount(Scanner scanner, Account account) {
         // Prevent admin from deleting themselves
-        System.out.print("Enter your admin username for confirmation: ");
+        System.out.print("\nEnter your admin username for confirmation: ");
         String adminUsername = scanner.nextLine().trim();
 
         if (adminUsername.isEmpty()) {

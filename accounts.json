@@ -43,5 +43,26 @@
     "fullName": "Ethan Khoo Tsui Ern",
     "contactNumber": "60124512565",
     "adminId": "A003"
+  },
+  {
+    "username": "Syy",
+    "password": "7d9bf753d936cee7986226604e0c9e91236fae23a626f302259bdae1a4b4115c",
+    "role": "CUSTOMER",
+    "email": "sooyy-wm23@student.tarc.edu.my",
+    "fullName": "Soo YiYing",
+    "contactNumber": "60125425451",
+    "address": "kepong",
+    "dateOfBirth": "2001-02-04",
+    "licenseNumber": "010204-10-5454",
+    "emergencyContact": ""
+  },
+  {
+    "username": "SELENA",
+    "password": "2025d54dfb0f1b28e394ebf4fb5b71f471926d4972cfc4d944bf491c8f9a8892",
+    "role": "ADMIN",
+    "email": "SELENA@gmail.com",
+    "fullName": "SELENA TAN",
+    "contactNumber": "60125458565",
+    "adminId": "A004"
   }
 ]

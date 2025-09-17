@@ -1,1 +1,4 @@
 Ethan Khoo Tsui Ern|1|Honda City|662.4|0.0|0.0|662.4|2025-09-02 to 2025-09-13|PAID
+Ethan Khoo Tsui Ern|1|Nissan Serena|193.8|0.0|0.0|193.8|2025-09-16 to 2025-09-17|PAID
+Soo Yoke Ying|2|Proton S70|432.9|0.0|0.0|432.9|2025-09-16 to 2025-09-21|PAID
+Ethan Khoo Tsui Ern|1|Nissan Serena|784.89|0.0|0.0|784.89|2025-09-17 to 2025-09-25|PAID

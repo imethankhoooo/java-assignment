@@ -1,8 +1,10 @@
 package models;
+
 import enums.AccountRole;
 import interfaces.User;
 
 public abstract class Account implements User {
+
     private String username;
     private String password;
     private AccountRole role;
@@ -18,7 +20,7 @@ public abstract class Account implements User {
         this.fullName = "";
         this.contactNumber = "";
     }
-    
+
     public Account(String username, String password, AccountRole role, String email) {
         this.username = username;
         this.password = password;
@@ -27,7 +29,7 @@ public abstract class Account implements User {
         this.fullName = "";
         this.contactNumber = "";
     }
-    
+
     public Account(String username, String password, AccountRole role, String email, String fullName, String contactNumber) {
         this.username = username;
         this.password = password;
@@ -36,8 +38,6 @@ public abstract class Account implements User {
         this.fullName = fullName != null ? fullName : "";
         this.contactNumber = contactNumber != null ? contactNumber : "";
     }
-    
-
 
     public String getUsername() {
         return username;
@@ -71,9 +71,12 @@ public abstract class Account implements User {
         }
         this.role = role;
     }
-    
-    public String getEmail() { return email; }
-    public void setEmail(String email) { 
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
         if (email == null || email.trim().isEmpty()) {
             this.email = "";
             return;
@@ -82,14 +85,22 @@ public abstract class Account implements User {
         if (!(e.contains("@") && e.contains(".") && e.indexOf("@") < e.lastIndexOf("."))) {
             throw new IllegalArgumentException("Invalid email format");
         }
-        this.email = e; 
+        this.email = e;
     }
-    
-    public String getFullName() { return fullName; }
-    public void setFullName(String fullName) { this.fullName = fullName != null ? fullName.trim() : ""; }
-    
-    public String getContactNumber() { return contactNumber; }
-    public void setContactNumber(String contactNumber) { 
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName != null ? fullName.trim() : "";
+    }
+
+    public String getContactNumber() {
+        return contactNumber;
+    }
+
+    public void setContactNumber(String contactNumber) {
         if (contactNumber == null || contactNumber.trim().isEmpty()) {
             this.contactNumber = "";
             return;
@@ -98,48 +109,51 @@ public abstract class Account implements User {
         if (!(contactNumber.startsWith("60") && digitsOnly.length() >= 11 && digitsOnly.length() <= 13)) {
             throw new IllegalArgumentException("Invalid contact number format");
         }
-        this.contactNumber = contactNumber.trim(); 
+        this.contactNumber = contactNumber.trim();
     }
-    
+
     // Implementation of User interface methods
-    
     @Override
     public boolean validateCredentials(String password) {
-        if (password == null) return false;
+        if (password == null) {
+            return false;
+        }
         String hashed = hashPassword(password);
         return this.password.equals(hashed) || this.password.equals(password);
     }
-    
+
     @Override
     public String getAccountInfo() {
         return String.format("Username: %s, Role: %s, Name: %s, Email: %s, Contact: %s",
-                           username, role, fullName, email, contactNumber);
+                username, role, fullName, email, contactNumber);
     }
-    
+
     @Override
     public boolean isAccountValid() {
-        return username != null && !username.trim().isEmpty() &&
-               password != null && !password.trim().isEmpty() &&
-               role != null;
+        return username != null && !username.trim().isEmpty()
+                && password != null && !password.trim().isEmpty()
+                && role != null;
     }
-    
+
     // Abstract methods to be implemented by subclasses
-    
     /**
      * Get the specific account type identifier
+     *
      * @return account type string (e.g., "Customer", "Admin")
      */
     @Override
     public abstract String getAccountType();
-    
+
     /**
      * Get detailed account information specific to the account type
+     *
      * @return detailed account information string
      */
     public abstract String getDetailedAccountInfo();
-    
+
     /**
      * Validate account-specific information
+     *
      * @return true if account-specific data is valid
      */
     public abstract boolean validateAccountSpecificData();
@@ -152,7 +166,9 @@ public abstract class Account implements User {
             StringBuilder hexString = new StringBuilder();
             for (byte b : hash) {
                 String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
                 hexString.append(hex);
             }
             return hexString.toString();
@@ -161,4 +177,4 @@ public abstract class Account implements User {
         }
     }
 
-} 
+}
