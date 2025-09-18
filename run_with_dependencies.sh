@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Starting Java Vehicle Rental System with dependencies..."
+echo "Starting CarSeek with dependencies..."
 
 # Set classpath to include all JAR files in lib directory
 export CLASSPATH="src:lib/*"

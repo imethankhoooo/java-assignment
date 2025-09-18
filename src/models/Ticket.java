@@ -1,13 +1,15 @@
 package models;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 /**
- * Rental Ticket class - represents a booking confirmation ticket
- * Generated when admin approves a rental request
+ * Rental Ticket class - represents a booking confirmation ticket Generated when
+ * admin approves a rental request
  */
 public class Ticket {
+
     private String ticketId;
     private int rentalId;
     private String customerName;
@@ -22,7 +24,7 @@ public class Ticket {
     private String pickupLocation;
     private String specialInstructions;
     private boolean isUsed;
-    
+
     // Constructor
     public Ticket(Rental rental) {
         this.ticketId = generateTicketId();
@@ -36,18 +38,18 @@ public class Ticket {
         this.totalFee = rental.getTotalFee();
         this.insuranceIncluded = rental.isInsuranceSelected();
         this.generatedTime = LocalDateTime.now();
-        this.pickupLocation = "Main Office - Vehicle Rental Center";
+        this.pickupLocation = "Main Office - CarSeek HQ";
         this.specialInstructions = "Please bring valid ID and this ticket for vehicle pickup";
         this.isUsed = false;
     }
-    
+
     // Generate unique ticket ID
     private String generateTicketId() {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         String randomPart = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         return "TKT-" + timestamp + "-" + randomPart;
     }
-    
+
     /**
      * Update ticket information from rental (for rental extensions)
      */
@@ -66,11 +68,11 @@ public class Ticket {
         // Reset used status for updated ticket
         this.isUsed = false;
     }
-    
+
     // Display ticket information
     public void displayTicket() {
         System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
-        System.out.println("║                        RENTAL CONFIRMATION TICKET                ║");
+        System.out.println("║                    RENTAL CONFIRMATION TICKET                    ║");
         System.out.println("╠══════════════════════════════════════════════════════════════════╣");
         System.out.printf("║ Ticket ID: %-53s ║%n", ticketId);
         System.out.printf("║ Rental ID: %-53d ║%n", rentalId);
@@ -96,35 +98,81 @@ public class Ticket {
         System.out.println("║ - Vehicle inspection will be conducted before handover           ║");
         System.out.println("╚══════════════════════════════════════════════════════════════════╝");
     }
-    
+
     // Compact display for lists
     public void displayCompact() {
         System.out.printf("Ticket: %s | Rental: %d | Vehicle: %s (%s) | Period: %s to %s | Fee: RM%.2f%n",
                 ticketId, rentalId, vehicleInfo, carPlate, startDate, endDate, totalFee);
     }
-    
+
     // Mark ticket as used
     public void markAsUsed() {
         this.isUsed = true;
     }
-    
+
     // Getters
-    public String getTicketId() { return ticketId; }
-    public int getRentalId() { return rentalId; }
-    public String getCustomerName() { return customerName; }
-    public String getCustomerContact() { return customerContact; }
-    public String getVehicleInfo() { return vehicleInfo; }
-    public String getCarPlate() { return carPlate; }
-    public String getStartDate() { return startDate; }
-    public String getEndDate() { return endDate; }
-    public double getTotalFee() { return totalFee; }
-    public boolean isInsuranceIncluded() { return insuranceIncluded; }
-    public LocalDateTime getGeneratedTime() { return generatedTime; }
-    public String getPickupLocation() { return pickupLocation; }
-    public String getSpecialInstructions() { return specialInstructions; }
-    public boolean isUsed() { return isUsed; }
-    
+    public String getTicketId() {
+        return ticketId;
+    }
+
+    public int getRentalId() {
+        return rentalId;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public String getCustomerContact() {
+        return customerContact;
+    }
+
+    public String getVehicleInfo() {
+        return vehicleInfo;
+    }
+
+    public String getCarPlate() {
+        return carPlate;
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public double getTotalFee() {
+        return totalFee;
+    }
+
+    public boolean isInsuranceIncluded() {
+        return insuranceIncluded;
+    }
+
+    public LocalDateTime getGeneratedTime() {
+        return generatedTime;
+    }
+
+    public String getPickupLocation() {
+        return pickupLocation;
+    }
+
+    public String getSpecialInstructions() {
+        return specialInstructions;
+    }
+
+    public boolean isUsed() {
+        return isUsed;
+    }
+
     // Setters
-    public void setPickupLocation(String pickupLocation) { this.pickupLocation = pickupLocation; }
-    public void setSpecialInstructions(String specialInstructions) { this.specialInstructions = specialInstructions; }
-} 
+    public void setPickupLocation(String pickupLocation) {
+        this.pickupLocation = pickupLocation;
+    }
+
+    public void setSpecialInstructions(String specialInstructions) {
+        this.specialInstructions = specialInstructions;
+    }
+}

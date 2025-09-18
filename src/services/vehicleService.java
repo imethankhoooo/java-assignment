@@ -438,45 +438,63 @@ public class vehicleService {
         while (true) {
             System.out.println("\nAdding New Vehicle...");
             try {
-                System.out.print("Enter Vehicle ID     : ");
-                String vehicleID = capitalLetter(scanner.nextLine().trim());
-                if (!vehicleID.matches("[A-Z]\\d{4}")) { // Example: F1001, S1001
-                    System.out.println("Error: Vehicle ID format must be 1 letter followed by 4 digits (e.g., F1001).");
-                    continue;
-                }
-
-                System.out.print("Enter Plate No       : "); // WMR1234
-                String plateNo = scanner.nextLine().toUpperCase().replaceAll("\\s+", ""); //all uppercase + remove spaces
-                if (!plateNo.matches("^[A-Z]{1,3}\\d{1,4}[A-Z]?$")) {
-                    System.out.println("Error: Invalid plate number format. Example: WA1234L, WMR1234, JBA1234");
-                    continue;
-                }
-
-                // check duplicate
-                boolean duplicate = false;
-
-                // go through each vehicle store in the list
-                for (Vehicle v : vehicles) {
-                    if (v.getVehicleID().equalsIgnoreCase(vehicleID)) {
-                        System.out.println("Error: Vehicle ID already exists.");
-                        duplicate = true;
-                        break;
-                    }
-                    if (v.getPlateNo().equalsIgnoreCase(plateNo)) {
-                        System.out.println("Error: Plate number already exists.");
-                        duplicate = true;
-                        break;
-                    }
-                }
-
-                if (duplicate) {
-                    System.out.print("Do you want to re-enter? (Y = re-enter / N = back to main menu): ");
-                    String response = scanner.nextLine();
-                    if (response.equalsIgnoreCase("Y")) {
-                        continue; // loop again to re-enter details
-                    } else {
+                // Step 1: Vehicle ID with field-level retry and immediate duplicate check
+                String vehicleID = null;
+                while (vehicleID == null) {
+                    vehicleID = getValidatedInput(scanner, "Enter Vehicle ID (e.g., F1001): ", "[A-Z]\\d{4}", 
+                        "Error: Vehicle ID format must be 1 letter followed by 4 digits.");
+                    if (vehicleID == null) {
                         System.out.println("Returning to main menu...");
-                        return; // exit add process
+                        return;
+                    }
+                    vehicleID = capitalLetter(vehicleID);
+                    
+                    // Immediately check for Vehicle ID duplicate
+                    boolean duplicateFound = false;
+                    for (Vehicle v : vehicles) {
+                        if (v.getVehicleID().equalsIgnoreCase(vehicleID)) {
+                            System.out.println("Error: Vehicle ID already exists.");
+                            if (!AccountService.getYesNoInput(scanner, "Try again?")) {
+                                System.out.println("Returning to main menu...");
+                                return;
+                            }
+                            vehicleID = null; // Reset to retry
+                            duplicateFound = true;
+                            break;
+                        }
+                    }
+                    if (!duplicateFound) {
+                        break; // Vehicle ID is valid and unique
+                    }
+                }
+                
+                // Step 2: Plate Number with field-level retry and immediate duplicate check
+                String plateNo = null;
+                while (plateNo == null) {
+                    plateNo = getValidatedInput(scanner, "Enter Plate No (e.g., WMR1234): ", "^[A-Z]{1,3}\\d{1,4}[A-Z]?$", 
+                        "Error: Invalid plate number format. Example: WA1234L, WMR1234, JBA1234");
+                    if (plateNo == null) {
+                        System.out.println("Returning to main menu...");
+                        return;
+                    }
+                    plateNo = plateNo.toUpperCase().replaceAll("\\s+", "");
+                    
+                    // Immediately check for Plate No duplicate
+                    boolean duplicateFound = false;
+                    for (Vehicle v : vehicles) {
+                        if (v.getPlateNo().equalsIgnoreCase(plateNo)) {
+                            System.out.println("Error: Plate number already exists.");
+                            if (!AccountService.getYesNoInput(scanner, "Try again?")) {
+                                System.out.println("Returning to main menu...");
+                                return;
+                            }
+                            plateNo = null; // Reset to retry
+                            duplicateFound = true;
+                            break;
+                        }
+                    }
+                    if (!duplicateFound) {
+                        break; // Plate No is valid and unique
                     }
                 }
 
@@ -492,18 +510,28 @@ public class vehicleService {
                 }
                 }
 
-                System.out.print("Enter Car Model      : "); // Axia, Camry, ...
-                String carModel = capitalLetter(scanner.nextLine().trim());
-                if (!carModel.matches("[A-Za-z0-9 ]+")) { // allow letters+digits like X50
-                    System.out.println("Error: Model must contain only letters or numbers.");
-                    continue;
+                // Step 4: Model with field-level retry
+                String carModel = null;
+                while (carModel == null) {
+                    carModel = getValidatedInput(scanner, "Enter Car Model (e.g., Axia, Camry): ", "[A-Za-z0-9 ]+", 
+                        "Error: Model must contain only letters or numbers.");
+                    if (carModel == null) {
+                        System.out.println("Returning to main menu...");
+                        return;
+                    }
+                    carModel = capitalLetter(carModel);
                 }
 
-                System.out.print("Enter Car Type       : "); // SUV, sedan, ...
-                String carType = capitalLetter(scanner.nextLine().trim());
-                if (!carType.matches("[A-Za-z ]+")) {
-                    System.out.println("Error: Type must contain only letters.");
-                    continue;
+                // Step 5: Type with field-level retry
+                String carType = null;
+                while (carType == null) {
+                    carType = getValidatedInput(scanner, "Enter Car Type (e.g., SUV, Sedan): ", "[A-Za-z ]+", 
+                        "Error: Type must contain only letters.");
+                    if (carType == null) {
+                        System.out.println("Returning to main menu...");
+                        return;
+                    }
+                    carType = capitalLetter(carType);
                 }
 
                 // Step 6: Fuel Type with selection menu
@@ -518,25 +546,40 @@ public class vehicleService {
                 }
                 }
 
-                System.out.print("Enter Color          : ");
-                String color = capitalLetter(scanner.nextLine().trim());
-                if (!color.matches("[A-Za-z ]+")) {
-                    System.out.println("Error: Color must contain only letters.");
-                    continue;
+                // Step 7: Color with field-level retry
+                String color = null;
+                while (color == null) {
+                    color = getValidatedInput(scanner, "Enter Color: ", "[A-Za-z ]+", 
+                        "Error: Color must contain only letters.");
+                    if (color == null) {
+                        System.out.println("Returning to main menu...");
+                        return;
+                    }
+                    color = capitalLetter(color);
                 }
 
-                int purchaseYear;
-                try {
-                    System.out.print("Enter Purchase Year  : ");
-                    purchaseYear = Integer.parseInt(scanner.nextLine().trim());
-                    int currentYear = LocalDate.now().getYear();
-                    if (purchaseYear < 2000 || purchaseYear > currentYear) {
-                        System.out.println("Error: Year must be between 2000 and " + currentYear + ".");
-                        continue;
+                // Step 8: Purchase Year with field-level retry
+                int purchaseYear = 0;
+                while (purchaseYear == 0) {
+                    try {
+                        System.out.print("Enter Purchase Year: ");
+                        purchaseYear = Integer.parseInt(scanner.nextLine().trim());
+                        int currentYear = LocalDate.now().getYear();
+                        if (purchaseYear < 2000 || purchaseYear > currentYear) {
+                            System.out.println("Error: Year must be between 2000 and " + currentYear + ".");
+                            if (!AccountService.getYesNoInput(scanner, "Try again?")) {
+                                System.out.println("Returning to main menu...");
+                                return;
+                            }
+                            purchaseYear = 0;
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Error: Enter a valid year (numbers only).");
+                        if (!AccountService.getYesNoInput(scanner, "Try again?")) {
+                            System.out.println("Returning to main menu...");
+                            return;
+                        }
                     }
-                } catch (NumberFormatException e) {
-                    System.out.println("Error: Enter a valid year (numbers only).");
-                    continue;
                 }
 
                 // Step 9: Capacity with selection menu
@@ -552,44 +595,74 @@ public class vehicleService {
                 }
                 }
 
-                System.out.print("Enter Condition (new/used): ");
-                String condition = capitalLetter(scanner.nextLine().trim());
-                if (!condition.equalsIgnoreCase("new") && !condition.equalsIgnoreCase("used")) {
-                    System.out.println("Error: Condition must be 'new' or 'used'.");
-                    continue;
-                }
-
-                double insuranceRate;
-                try {
-                    System.out.print("Enter Insurance Rate : ");
-                    insuranceRate = Double.parseDouble(scanner.nextLine().trim());
-                    if (insuranceRate < 0) {
-                        System.out.println("Error: Insurance rate must not be negative.");
-                        continue;
+                // Step 10: Condition with field-level retry
+                String condition = null;
+                while (condition == null) {
+                    condition = getValidatedInput(scanner, "Enter Condition (new/used): ", "(?i)(new|used)", 
+                        "Error: Condition must be 'new' or 'used'.");
+                    if (condition == null) {
+                        System.out.println("Returning to main menu...");
+                        return;
                     }
-                } catch (NumberFormatException e) {
-                    System.out.println("Error: Enter a valid number for insurance rate.");
-                    continue;
+                    condition = capitalLetter(condition);
                 }
 
-                System.out.print("Car Availability (available/reserved): ");
-                String available = capitalLetter(scanner.nextLine().trim());
-                if (!available.equalsIgnoreCase("available") && !available.equalsIgnoreCase("reserved")) {
-                    System.out.println("Error: Availability must be 'available' or 'reserved'.");
-                    continue;
-                }
-
-                double basePrice;
-                try {
-                    System.out.print("Enter Base Price Per Day: ");
-                    basePrice = Double.parseDouble(scanner.nextLine().trim());
-                    if (basePrice <= 0) {
-                        System.out.println("Error: Base price must be positive.");
-                        continue;
+                // Step 11: Insurance Rate with field-level retry
+                double insuranceRate = -1;
+                while (insuranceRate == -1) {
+                    try {
+                        System.out.print("Enter Insurance Rate (0.0-1.0): ");
+                        insuranceRate = Double.parseDouble(scanner.nextLine().trim());
+                        if (insuranceRate < 0 || insuranceRate > 1) {
+                            System.out.println("Error: Insurance rate must be between 0.0 and 1.0.");
+                            if (!AccountService.getYesNoInput(scanner, "Try again?")) {
+                                System.out.println("Returning to main menu...");
+                                return;
+                            }
+                            insuranceRate = -1;
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Error: Enter a valid number for insurance rate.");
+                        if (!AccountService.getYesNoInput(scanner, "Try again?")) {
+                            System.out.println("Returning to main menu...");
+                            return;
+                        }
                     }
-                } catch (NumberFormatException e) {
-                    System.out.println("Error: Enter a valid number for base price.");
-                    continue;
+                }
+
+                // Step 12: Availability with field-level retry
+                String available = null;
+                while (available == null) {
+                    available = getValidatedInput(scanner, "Car Availability (available/reserved): ", "(?i)(available|reserved)", 
+                        "Error: Availability must be 'available' or 'reserved'.");
+                    if (available == null) {
+                        System.out.println("Returning to main menu...");
+                        return;
+                    }
+                    available = capitalLetter(available);
+                }
+
+                // Step 13: Base Price with field-level retry
+                double basePrice = 0;
+                while (basePrice == 0) {
+                    try {
+                        System.out.print("Enter Base Price Per Day: ");
+                        basePrice = Double.parseDouble(scanner.nextLine().trim());
+                        if (basePrice <= 0) {
+                            System.out.println("Error: Base price must be positive.");
+                            if (!AccountService.getYesNoInput(scanner, "Try again?")) {
+                                System.out.println("Returning to main menu...");
+                                return;
+                            }
+                            basePrice = 0;
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Error: Enter a valid number for base price.");
+                        if (!AccountService.getYesNoInput(scanner, "Try again?")) {
+                            System.out.println("Returning to main menu...");
+                            return;
+                        }
+                    }
                 }
 
                 // create new vehicle

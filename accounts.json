@@ -24,23 +24,11 @@
     "emergencyContact": "0125245125"
   },
   {
-    "username": "user2",
-    "password": "07fb47212f7d30f8c9e1d9843228b65a301cee6ea7624ea9372539ea21603246",
-    "role": "CUSTOMER",
-    "email": "sooyy-wm23@student.tarc.edu.my",
-    "fullName": "SooYY",
-    "contactNumber": "60123536555",
-    "address": "pv9",
-    "dateOfBirth": "2005-04-23",
-    "licenseNumber": "050423-10-5245",
-    "emergencyContact": ""
-  },
-  {
     "username": "admin1",
     "password": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
     "role": "ADMIN",
-    "email": "ethankhoo05@gmail.com",
-    "fullName": "Ethan Khoo",
+    "email": "reneesoo55@gmail.com",
+    "fullName": "Renee Soo",
     "contactNumber": "60124512565",
     "adminId": "A003"
   },
@@ -54,30 +42,6 @@
     "address": "kepong",
     "dateOfBirth": "2001-02-04",
     "licenseNumber": "010204-10-5454",
-    "emergencyContact": ""
-  },
-  {
-    "username": "SELENA",
-    "password": "2025d54dfb0f1b28e394ebf4fb5b71f471926d4972cfc4d944bf491c8f9a8892",
-    "role": "CUSTOMER",
-    "email": "yokeying0506@gmail.com",
-    "fullName": "SELENA TAN",
-    "contactNumber": "60125465425",
-    "address": "WANGSA MAJU",
-    "dateOfBirth": "2004-02-15",
-    "licenseNumber": "040215-10-4512",
-    "emergencyContact": ""
-  },
-  {
-    "username": "Ethan Khoo Tsui Ern",
-    "password": "1229e0b7a82ddd3f554efd8bc31986e0167ad168992a8ce1e660ba04a31e28b6",
-    "role": "CUSTOMER",
-    "email": "yokeying0506@gmail.com",
-    "fullName": "Ethan Khoo",
-    "contactNumber": "60124546545",
-    "address": "TARUMT",
-    "dateOfBirth": "2005-01-01",
-    "licenseNumber": "050101-10-2542",
     "emergencyContact": ""
   }
 ]
