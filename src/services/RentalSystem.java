@@ -12,6 +12,7 @@ import static services.UtilityService.*;
  * Main system class: manages accounts, vehicles, rentals and core operations
  */
 public class RentalSystem {
+
     private List<Rental> rentals;
     private NotificationService notificationService;
     private TicketService ticketService;
@@ -27,9 +28,7 @@ public class RentalSystem {
     }
 
     // Account management moved to AccountService
-
     // Account saving moved to AccountService
-
     /**
      * Load rental data from JSON file
      */
@@ -42,8 +41,9 @@ public class RentalSystem {
             }
 
             rentals = parseRentalsFromJson(jsonContent.toString());
-            if (rentals == null)
+            if (rentals == null) {
                 rentals = new ArrayList<>();
+            }
 
             System.out.println("Loaded rentals: " + rentals.size());
             // Update next rental ID
@@ -71,7 +71,6 @@ public class RentalSystem {
     }
 
     // Account parsing moved to AccountService
-
     /**
      * Parse rental JSON data
      */
@@ -250,8 +249,9 @@ public class RentalSystem {
             if (discounts != null && !discounts.isEmpty()) {
                 int count = 0;
                 for (Map.Entry<Integer, Double> entry : discounts.entrySet()) {
-                    if (count > 0)
+                    if (count > 0) {
                         json.append(",");
+                    }
                     json.append("\"").append(entry.getKey()).append("\": ").append(entry.getValue());
                     count++;
                 }
@@ -293,31 +293,21 @@ public class RentalSystem {
         return json.toString();
     }
 
-
-
-
-
-
-
     /**
      * Login validation, returns Account object or null
      */
     // Login moved to AccountService
-
     // Password methods moved to AccountService
-
     // Account lookup moved to AccountService
-
     // Customer management moved to separate service
-
     /**
-     * Check for rental conflicts (same vehicle, overlapping dates with buffer) and
-     * return conflict details
+     * Check for rental conflicts (same vehicle, overlapping dates with buffer)
+     * and return conflict details
      */
     public String getConflictDetails(int vehicleId, LocalDate startDate, LocalDate endDate) {
         for (Rental r : rentals) {
-            if (r.getVehicle().getId() == vehicleId &&
-                    (r.getStatus() == RentalStatus.ACTIVE || r.getStatus() == RentalStatus.PENDING)) {
+            if (r.getVehicle().getId() == vehicleId
+                    && (r.getStatus() == RentalStatus.ACTIVE || r.getStatus() == RentalStatus.PENDING)) {
 
                 // Include 2-day buffer periods
                 LocalDate bufferStart = r.getStartDate().minusDays(2);
@@ -371,6 +361,36 @@ public class RentalSystem {
         }
 
         return totalFee;
+    }
+
+    /**
+     * Calculate deposit required for rental (50% for rentals > 3 days)
+     */
+    public double calculateDeposit(Vehicle vehicle, LocalDate startDate, LocalDate endDate, boolean insurance) {
+        long days = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+        
+        // No deposit required for rentals 3 days or less
+        if (days <= 3) {
+            return 0.0;
+        }
+        
+        // 50% deposit for rentals longer than 3 days
+        double totalFee = calculateRentalFee(vehicle, startDate, endDate, insurance);
+        return totalFee * 0.5;
+    }
+
+    /**
+     * Validate booking date range (maximum 3 years in advance)
+     */
+    public boolean validateBookingDateRange(LocalDate startDate) {
+        LocalDate today = LocalDate.now();
+        LocalDate maxAllowedDate = today.plusYears(3);
+        
+        if (startDate.isAfter(maxAllowedDate)) {
+            return false;
+        }
+        
+        return true;
     }
 
     /**
@@ -602,20 +622,12 @@ public class RentalSystem {
         return result;
     }
 
-
-
-
-
-
-
     // Account management moved to AccountService
-
     public List<Rental> getRentals() {
         return rentals;
     }
 
     // Customer management moved to AccountService
-
     // Get notification service
     public NotificationService getNotificationService() {
         return notificationService;
@@ -651,17 +663,13 @@ public class RentalSystem {
     }
 
     // Generate report
-
-
-
-
     /**
      * Create rental (updated version, supports new vehicle booking system)
      */
     public Rental createRentalWithSchedule(Customer customer, Vehicle vehicle, LocalDate startDate,
             LocalDate endDate, boolean insurance, String username) {
-        // Check if vehicle is available (including buffer period check)
-        if (!vehicle.isAvailable(startDate, endDate)) {
+        // Check if vehicle has time conflicts with existing rentals (smarter check)
+        if (hasTimeConflict(vehicle.getId(), startDate, endDate)) {
             throw new IllegalArgumentException("Vehicle is not available for the requested period");
         }
 
@@ -670,8 +678,8 @@ public class RentalSystem {
                 RentalStatus.PENDING, fee, insurance, username);
         rentals.add(rental);
 
-        // Add to vehicle booking schedule
-        vehicle.addBooking(startDate, endDate);
+        // Add to vehicle booking schedule (skip the isAvailable check since we already verified no conflicts)
+        vehicle.addBookingForExtension(startDate, endDate);
 
         // Update vehicle status to reserved
         vehicle.setStatus("reserved");
@@ -728,21 +736,41 @@ public class RentalSystem {
     /**
      * Get all available vehicles
      */
-
+    /**
+     * Check if there's a time conflict for vehicle booking (smarter check)
+     */
+    public boolean hasTimeConflict(int vehicleId, LocalDate startDate, LocalDate endDate) {
+        // Check against all active and pending rentals for this vehicle
+        for (Rental rental : rentals) {
+            if (rental.getVehicle().getId() == vehicleId 
+                && (rental.getStatus() == RentalStatus.ACTIVE || rental.getStatus() == RentalStatus.PENDING)) {
+                
+                // Apply 2-day buffer around existing rental
+                LocalDate bufferStart = rental.getStartDate().minusDays(2);
+                LocalDate bufferEnd = rental.getEndDate().plusDays(2);
+                
+                // Check if new booking overlaps with buffer period
+                if (!startDate.isAfter(bufferEnd) && !endDate.isBefore(bufferStart)) {
+                    return true; // Has conflict
+                }
+            }
+        }
+        return false; // No conflict
+    }
 
     /**
      * Check if this is a rental extension by the same user (no buffer needed)
      */
     public boolean isRentalExtension(int vehicleId, LocalDate startDate, LocalDate endDate, String username) {
         for (Rental r : rentals) {
-            if (r.getVehicle().getId() == vehicleId &&
-                    r.getUsername().equals(username) &&
-                    (r.getStatus() == RentalStatus.ACTIVE || r.getStatus() == RentalStatus.PENDING)) {
+            if (r.getVehicle().getId() == vehicleId
+                    && r.getUsername().equals(username)
+                    && (r.getStatus() == RentalStatus.ACTIVE || r.getStatus() == RentalStatus.PENDING)) {
 
                 // Check if the new booking is adjacent or overlapping with existing booking
-                if (startDate.equals(r.getEndDate().plusDays(1)) ||
-                        endDate.equals(r.getStartDate().minusDays(1)) ||
-                        (!startDate.isAfter(r.getEndDate()) && !endDate.isBefore(r.getStartDate()))) {
+                if (startDate.equals(r.getEndDate().plusDays(1))
+                        || endDate.equals(r.getStartDate().minusDays(1))
+                        || (!startDate.isAfter(r.getEndDate()) && !endDate.isBefore(r.getStartDate()))) {
                     return true;
                 }
             }
@@ -770,8 +798,6 @@ public class RentalSystem {
     /**
      * Search and display user accounts (for admin offline booking)
      */
-
-
     /**
      * Get account by username
      */
@@ -789,10 +815,9 @@ public class RentalSystem {
      */
     public Rental createOfflineRental(Customer customer, Vehicle vehicle, LocalDate startDate,
             LocalDate endDate, boolean insurance, String username) {
-        // Check if vehicle is available
-        String conflictDetails = getConflictDetailsWithExtension(vehicle.getId(), startDate, endDate, username);
-        if (conflictDetails != null) {
-            throw new IllegalArgumentException("Vehicle conflict: " + conflictDetails);
+        // Check if vehicle has time conflicts (same logic as regular booking)
+        if (hasTimeConflict(vehicle.getId(), startDate, endDate)) {
+            throw new IllegalArgumentException("Vehicle is not available for the requested period");
         }
 
         double fee = calculateRentalFee(vehicle, startDate, endDate, insurance);
@@ -800,11 +825,17 @@ public class RentalSystem {
                 RentalStatus.ACTIVE, fee, insurance, username);
         rentals.add(rental);
 
-        // Add to vehicle schedule
-        vehicle.addBooking(startDate, endDate);
+        // Add to vehicle schedule (skip the isAvailable check since we already verified no conflicts)
+        vehicle.addBookingForExtension(startDate, endDate);
 
         // Set vehicle status to RENTED
         vehicle.setStatus("rented");
+
+        // Also update the vehicle in vehicleService to keep data in sync
+        Vehicle vehicleInService = vehicleService.findVehicleById(vehicle.getId());
+        if (vehicleInService != null) {
+            vehicleInService.setStatus("rented");
+        }
 
         // Generate ticket immediately
         ticketService.generateTicket(rental);
@@ -825,8 +856,8 @@ public class RentalSystem {
         String accountFullName = (account != null) ? account.getFullName() : null;
 
         for (Rental rental : rentals) {
-            if (rental.getVehicle().getId() == vehicleId &&
-                    rental.getStatus() == RentalStatus.ACTIVE) {
+            if (rental.getVehicle().getId() == vehicleId
+                    && rental.getStatus() == RentalStatus.ACTIVE) {
 
                 // Check username match
                 if (rental.getUsername() != null && rental.getUsername().equals(username)) {
@@ -834,15 +865,15 @@ public class RentalSystem {
                 }
 
                 // Check customer name match with account full name
-                if (accountFullName != null && !accountFullName.isEmpty() &&
-                        rental.getCustomer() != null &&
-                        rental.getCustomer().getName().equals(accountFullName)) {
+                if (accountFullName != null && !accountFullName.isEmpty()
+                        && rental.getCustomer() != null
+                        && rental.getCustomer().getName().equals(accountFullName)) {
                     return rental;
                 }
 
                 // Check if username matches customer name (fallback)
-                if (rental.getCustomer() != null &&
-                        rental.getCustomer().getName().equals(username)) {
+                if (rental.getCustomer() != null
+                        && rental.getCustomer().getName().equals(username)) {
                     return rental;
                 }
             }
@@ -1032,7 +1063,7 @@ public class RentalSystem {
                 selected = vehicleService.findVehicleByPlateNo(plateNo);
                 if (selected != null) {
                     break;
-                }else{
+                } else {
                     System.out.println("Vehicle not found.");
                 }
             } else {
@@ -1040,7 +1071,6 @@ public class RentalSystem {
 
             }
         }
-
         
         if (selected == null) {
             System.out.println("Vehicle not found.");
@@ -1066,7 +1096,6 @@ public class RentalSystem {
             System.out.printf("  Current rental period: %s to %s\n",
                     existingRental.getStartDate(), existingRental.getEndDate());
             System.out.printf("  Total fee: RM%.2f\n", existingRental.getTotalFee());
-            
 
             if (AccountService.getYesNoInput(scanner, "\nDo you want to extend this existing rental instead?")) {
                 int additionalDays = 0;
@@ -1267,6 +1296,12 @@ public class RentalSystem {
                         scanner.nextLine();
                         startDate = null; // Reset to continue loop
                         continue;
+                    } else if (!system.validateBookingDateRange(startDate)) {
+                        System.out.println("Error: Booking cannot be more than 3 years in advance.");
+                        System.out.println("\nPress Enter to continue...");
+                        scanner.nextLine();
+                        startDate = null; // Reset to continue loop
+                        continue;
                     } else {
                         break;
                     }
@@ -1305,6 +1340,11 @@ public class RentalSystem {
                     System.out.println("Rental days must be positive.");
                     System.out.println("\nPress Enter to continue...");
                     scanner.nextLine();
+                } else if (rentalDays > 30) {
+                    System.out.println("Error: Maximum rental duration is 30 days.");
+                    System.out.println("\nPress Enter to continue...");
+                    scanner.nextLine();
+                    rentalDays = 0;
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Invalid number format. Please enter a valid number.");
@@ -1387,15 +1427,50 @@ public class RentalSystem {
 
         // Final confirmation and booking
         double totalFee = system.calculateRentalFee(selected, startDate, endDate, insurance);
+        double deposit = system.calculateDeposit(selected, startDate, endDate, insurance);
+        long days = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+        
         System.out.println("\n=== Rental Summary ===\n");
         System.out.println("Vehicle: " + selected.getBrand() + " " + selected.getModel());
         System.out.println("Type: " + selected.getVehicleType() + " | Fuel: " + selected.getFuelType());
         System.out.println("Start Date: " + startDate);
         System.out.println("End Date: " + endDate);
+        System.out.println("Duration: " + days + " days");
         System.out.println("Insurance: " + (insurance ? "Included" : "Not included"));
         System.out.printf("Total Fee: RM%.2f\n", totalFee);
+        if (deposit > 0) {
+            System.out.printf("Deposit Required (50%%): RM%.2f\n", deposit);
+            System.out.printf("Remaining Payment: RM%.2f\n", totalFee - deposit);
+        } else {
+            System.out.println("Deposit Required: None (rental <= 3 days)");
+        }
 
         if (AccountService.getYesNoInput(scanner, "\nConfirm booking?")) {
+            // Process deposit payment if required
+            if (deposit > 0) {
+                System.out.println("\n=== DEPOSIT PAYMENT ===\n");
+                System.out.printf("Deposit Amount: RM%.2f\n", deposit);
+                System.out.println("Payment Method: Cash/Card/Bank Transfer");
+                
+                if (!AccountService.getYesNoInput(scanner, "Proceed with deposit payment?")) {
+                    if (AccountService.getYesNoInput(scanner, "Cancel booking?")) {
+                        System.out.println("Booking cancelled by customer.");
+                        return;
+                    } else {
+                        System.out.println("Returning to booking confirmation...");
+                        return;
+                    }
+                }
+                
+                System.out.println("Processing deposit payment...");
+                try {
+                    Thread.sleep(1500); // Simulate payment processing
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                System.out.println("Deposit payment successful!");
+            }
+            
             try {
                 clearScreen();
                 Rental rental = system.createRentalWithSchedule(customer, selected, startDate, endDate, insurance,
@@ -1408,7 +1483,12 @@ public class RentalSystem {
                 System.out.println("Booking failed: " + e.getMessage());
             }
         } else {
-            System.out.println("Booking cancelled.");
+            if (AccountService.getYesNoInput(scanner, "Cancel booking?")) {
+                System.out.println("Booking cancelled by customer.");
+            } else {
+                System.out.println("Returning to booking confirmation...");
+                // Could loop back to confirmation, but for now just exit
+            }
         }
     }
 
@@ -1452,9 +1532,9 @@ public class RentalSystem {
             System.out.println("\n[PENDING RENTALS] - Awaiting Admin Approval");
             System.out.println("================================================================");
             for (Rental r : pendingRentals) {
-                System.out.println("ID: " + r.getId() + " | Vehicle: " + r.getVehicle().getPlateNo() + " - " + r.getVehicle().getBrand() +
-                        " " + r.getVehicle().getModel() + " | Period: " + r.getStartDate() +
-                        " to " + r.getEndDate() + " | Est. Fee: RM" + String.format("%.2f", r.getTotalFee()));
+                System.out.println("ID: " + r.getId() + " | Vehicle: " + r.getVehicle().getPlateNo() + " - " + r.getVehicle().getBrand()
+                        + " " + r.getVehicle().getModel() + " | Period: " + r.getStartDate()
+                        + " to " + r.getEndDate() + " | Est. Fee: RM" + String.format("%.2f", r.getTotalFee()));
             }
         }
 
@@ -1463,9 +1543,9 @@ public class RentalSystem {
             System.out.println("\n[ACTIVE RENTALS] - Currently in Use");
             System.out.println("================================================================");
             for (Rental r : activeRentals) {
-                System.out.println("ID: " + r.getId() + " | Vehicle: " + r.getVehicle().getPlateNo() + " - " + r.getVehicle().getBrand() +
-                        " " + r.getVehicle().getModel() + " | Period: " + r.getStartDate() +
-                        " to " + r.getEndDate() + " | Est. Fee: RM" + String.format("%.2f", r.getTotalFee()));
+                System.out.println("ID: " + r.getId() + " | Vehicle: " + r.getVehicle().getPlateNo() + " - " + r.getVehicle().getBrand()
+                        + " " + r.getVehicle().getModel() + " | Period: " + r.getStartDate()
+                        + " to " + r.getEndDate() + " | Est. Fee: RM" + String.format("%.2f", r.getTotalFee()));
             }
         }
 
@@ -1476,9 +1556,9 @@ public class RentalSystem {
             for (Rental r : returnedRentals) {
                 String feeDisplay = r.getActualFee() > 0 ? "Final Fee: RM" + String.format("%.2f", r.getActualFee())
                         : "Est. Fee: RM" + String.format("%.2f", r.getTotalFee());
-                System.out.println("ID: " + r.getId() + " | Vehicle: " + r.getVehicle().getBrand() +
-                        " " + r.getVehicle().getModel() + " | Period: " + r.getStartDate() +
-                        " to " + r.getEndDate() + " | " + feeDisplay);
+                System.out.println("ID: " + r.getId() + " | Vehicle: " + r.getVehicle().getBrand()
+                        + " " + r.getVehicle().getModel() + " | Period: " + r.getStartDate()
+                        + " to " + r.getEndDate() + " | " + feeDisplay);
             }
         }
 
@@ -1487,16 +1567,16 @@ public class RentalSystem {
             System.out.println("\n[CANCELLED RENTALS]");
             System.out.println("================================================================");
             for (Rental r : cancelledRentals) {
-                System.out.println("ID: " + r.getId() + " | Vehicle: " + r.getVehicle().getBrand() +
-                        " " + r.getVehicle().getModel() + " | Period: " + r.getStartDate() +
-                        " to " + r.getEndDate() + " | Status: CANCELLED");
+                System.out.println("ID: " + r.getId() + " | Vehicle: " + r.getVehicle().getBrand()
+                        + " " + r.getVehicle().getModel() + " | Period: " + r.getStartDate()
+                        + " to " + r.getEndDate() + " | Status: CANCELLED");
             }
         }
 
         System.out.println("\n================================================================");
-        System.out.println("Total Rentals: " + myRentals.size() + " | Pending: " + pendingRentals.size() +
-                " | Active: " + activeRentals.size() + " | Completed: " + returnedRentals.size() +
-                " | Cancelled: " + cancelledRentals.size());
+        System.out.println("Total Rentals: " + myRentals.size() + " | Pending: " + pendingRentals.size()
+                + " | Active: " + activeRentals.size() + " | Completed: " + returnedRentals.size()
+                + " | Cancelled: " + cancelledRentals.size());
     }
 
     // Quick search
@@ -1601,7 +1681,7 @@ public class RentalSystem {
 
             if (system.returnVehicle(rentalId, scanner)) {
                 System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
-                System.out.println("║                      RETURN SUMMARY                             ║");
+                System.out.println("║                      RETURN SUMMARY                              ║");
                 System.out.println("╚══════════════════════════════════════════════════════════════════╝");
                 System.out.println(" Vehicle returned successfully.");
                 System.out.printf("Vehicle: %s %s\n", vehicle.getBrand(), vehicle.getModel());
@@ -1637,19 +1717,22 @@ public class RentalSystem {
 
         for (Rental r : rentals) {
             String customerName = r.getCustomer().getName();
-            if (customerName.length() > 19)
+            if (customerName.length() > 19) {
                 customerName = customerName.substring(0, 16) + "...";
+            }
 
             String vehicleInfo = String.format("%s - %s %s", 
                 r.getVehicle().getPlateNo(),
                 r.getVehicle().getBrand(), 
                 r.getVehicle().getModel());
-            if (vehicleInfo.length() > 16)
+            if (vehicleInfo.length() > 16) {
                 vehicleInfo = vehicleInfo.substring(0, 13) + "...";
+            }
 
             String statusText = r.getStatus().toString();
-            if (statusText.length() > 10)
+            if (statusText.length() > 10) {
                 statusText = statusText.substring(0, 7) + "...";
+            }
 
             String feeDisplay;
             if (r.getStatus() == RentalStatus.RETURNED && r.getActualFee() > 0) {
@@ -1679,17 +1762,15 @@ public class RentalSystem {
             System.out.println("No pending rentals.");
         } else {
             for (Rental r : pendingRentals) {
-                System.out.println("ID: " + r.getId() + ", Customer: " + r.getCustomer().getName() +
-                        ", Vehicle: " + r.getVehicle().getBrand() + " " + r.getVehicle().getModel() +
-                        ", Dates: " + r.getStartDate() + " to " + r.getEndDate() +
-                        ", Estimated Fee: RM" + String.format("%.2f", r.getTotalFee()));
+                System.out.println("ID: " + r.getId() + ", Customer: " + r.getCustomer().getName()
+                        + ", Vehicle: " + r.getVehicle().getBrand() + " " + r.getVehicle().getModel()
+                        + ", Dates: " + r.getStartDate() + " to " + r.getEndDate()
+                        + ", Estimated Fee: RM" + String.format("%.2f", r.getTotalFee()));
             }
         }
     }
 
     public static void approveRental(RentalSystem system, Scanner scanner) {
-        System.out.println("\n=== Approve Rental ===");
-        viewPendingRentals(system.getPendingRentals());
 
         System.out.print("Enter rental ID to approve: ");
         String idStr = scanner.nextLine();
@@ -1822,11 +1903,11 @@ public class RentalSystem {
                     rental.getVehicle().getPlateNo(),
                     rental.getVehicle().getBrand(), 
                     rental.getVehicle().getModel());
-                if (vehicleInfo.length() > 25) {
-                    vehicleInfo = vehicleInfo.substring(0, 24) + "...";
+                if (vehicleInfo.length() > 32) {
+                    vehicleInfo = vehicleInfo.substring(0, 33) + "...";
                 }
                 
-                System.out.printf("│ %-3d │ %-11s │ %-24s │ %-11s │ %-11s │ RM%-9.2f │%n",
+                System.out.printf("│ %-3d │ %-11s │ %-32s │ %-11s │ %-11s │ RM%-9.2f │%n",
                         rental.getId(),
                         rental.getUsername() != null
                                 ? (rental.getUsername().length() > 11 ? rental.getUsername().substring(0, 11)
@@ -1967,6 +2048,7 @@ public class RentalSystem {
         TicketService ticketService = system.getTicketService();
 
         while (true) {
+            clearScreen();
             System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
             System.out.println("║                       TICKET MANAGEMENT                          ║");
             System.out.println("╠══════════════════════════════════════════════════════════════════╣");
@@ -2014,8 +2096,8 @@ public class RentalSystem {
         System.out.print("Enter ticket ID: ");
         String ticketId = scanner.nextLine();
 
-        System.out.print("Enter customer name: ");
-        String customerName = scanner.nextLine();
+        System.out.print("Enter customer IC last 4 digits: ");
+        String icLastFour = scanner.nextLine();
 
         TicketService ticketService = system.getTicketService();
         Ticket ticket = ticketService.getTicketById(ticketId);
@@ -2037,12 +2119,55 @@ public class RentalSystem {
             return;
         }
 
-        // Validate customer name (exact match, case-insensitive)
-        if (!ticket.getCustomerName().equalsIgnoreCase(customerName.trim())) {
-            System.out.println("\n ERROR: Customer name does not match!");
-            System.out.printf("Expected: %s\n", ticket.getCustomerName());
-            System.out.printf("Provided: %s\n", customerName.trim());
-            System.out.println("Pickup cancelled - name verification failed.");
+        // Find the rental associated with this ticket
+        Rental associatedRental = null;
+        for (Rental rental : system.getRentals()) {
+            Ticket rentalTicket = system.getTicketService().getTicketByRentalId(rental.getId());
+            if (rentalTicket != null && rentalTicket.getTicketId().equals(ticketId)) {
+                associatedRental = rental;
+                break;
+            }
+        }
+
+        if (associatedRental == null) {
+            System.out.println("\n ERROR: Could not find rental record for this ticket!");
+            System.out.println("Pickup cancelled - rental record not found.");
+            System.out.println("\nPress Enter to continue...");
+            scanner.nextLine();
+            return;
+        }
+
+        // Get customer IC from rental record (need to find customer account)
+        String customerUsername = associatedRental.getUsername();
+        Account customerAccount = AccountService.getAccountByUsername(customerUsername);
+        
+        if (customerAccount == null || !(customerAccount instanceof Customer)) {
+            System.out.println("\n ERROR: Could not find customer account for this rental!");
+            System.out.println("Pickup cancelled - customer account not found.");
+            System.out.println("\nPress Enter to continue...");
+            scanner.nextLine();
+            return;
+        }
+
+        Customer customer = (Customer) customerAccount;
+        String customerIC = customer.getLicenseNumber();
+        
+        if (customerIC == null || customerIC.trim().isEmpty()) {
+            System.out.println("\n ERROR: Customer IC number not found in records!");
+            System.out.println("Pickup cancelled - IC verification not possible.");
+            System.out.println("\nPress Enter to continue...");
+            scanner.nextLine();
+            return;
+        }
+
+        // Extract last 4 digits from IC (format: xxxxxx-xx-xxxx)
+        String icLastFourFromRecord = customerIC.substring(customerIC.length() - 4);
+        
+        // Validate IC last 4 digits
+        if (!icLastFourFromRecord.equals(icLastFour.trim())) {
+            System.out.println("\n ERROR: IC last 4 digits do not match!");
+            System.out.printf("Please verify and try again.%n");
+            System.out.println("Pickup cancelled - customer verification failed.");
             System.out.println("\nPress Enter to continue...");
             scanner.nextLine();
             return;
@@ -2075,7 +2200,7 @@ public class RentalSystem {
         String confirm = scanner.nextLine();
 
         if (confirm.equalsIgnoreCase("y")) {
-            if (ticketService.validateAndUseTicket(ticketId, customerName)) {
+            if (ticketService.validateAndUseTicket(ticketId, ticket.getCustomerName())) {
                 System.out.println(" Ticket validated successfully!");
                 System.out.println("Vehicle can be handed over to customer.");
 
@@ -2220,7 +2345,6 @@ public class RentalSystem {
             System.out.printf("  Current rental period: %s to %s\n",
                     existingRental.getStartDate(), existingRental.getEndDate());
             System.out.printf("  Total fee: RM%.2f\n", existingRental.getTotalFee());
-
             
             if (AccountService.getYesNoInput(scanner, "\nDo you want to extend this existing rental instead?")) {
                 int additionalDays = 0;
@@ -2340,6 +2464,12 @@ public class RentalSystem {
                         scanner.nextLine();
                         startDate = null; // Reset to continue loop
                         continue;
+                    } else if (!system.validateBookingDateRange(startDate)) {
+                        System.out.println("Error: Booking cannot be more than 3 years in advance.");
+                        System.out.println("\nPress Enter to continue...");
+                        scanner.nextLine();
+                        startDate = null; // Reset to continue loop
+                        continue;
                     } else {
                         break;
                     }
@@ -2378,6 +2508,11 @@ public class RentalSystem {
                     System.out.println("Rental days must be positive.");
                     System.out.println("\nPress Enter to continue...");
                     scanner.nextLine();
+                } else if (rentalDays > 30) {
+                    System.out.println("Error: Maximum rental duration is 30 days.");
+                    System.out.println("\nPress Enter to continue...");
+                    scanner.nextLine();
+                    rentalDays = 0;
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Invalid number format. Please enter a valid number.");
@@ -2433,16 +2568,43 @@ public class RentalSystem {
 
         // Step 6: Final confirmation and booking
         double totalFee = system.calculateRentalFee(selectedVehicle, startDate, endDate, insurance);
+        double deposit = system.calculateDeposit(selectedVehicle, startDate, endDate, insurance);
+        
         System.out.println("\n=== Booking Summary ===\n");
         System.out.println("Customer: " + customerName + " (" + selectedAccount.getUsername() + ")");
         System.out.println("Vehicle: " + selectedVehicle.getBrand() + " " + selectedVehicle.getModel());
         System.out.println("Period: " + startDate + " to " + endDate + " (" + rentalDays + " days)");
         System.out.println("Insurance: " + (insurance ? "Yes" : "No"));
         System.out.printf("Total Fee: RM%.2f\n", totalFee);
+        if (deposit > 0) {
+            System.out.printf("Deposit Required (50%%): RM%.2f\n", deposit);
+            System.out.printf("Remaining Payment: RM%.2f\n", totalFee - deposit);
+        } else {
+            System.out.println("Deposit Required: None (rental <= 3 days)");
+        }
 
         if (!AccountService.getYesNoInput(scanner, "\nConfirm offline booking?")) {
             System.out.println("Booking cancelled.");
             return;
+        }
+
+        // Process deposit payment if required
+        if (deposit > 0) {
+            System.out.println("\n=== DEPOSIT PAYMENT ===\n");
+            System.out.printf("Deposit Amount: RM%.2f\n", deposit);
+            System.out.println("Payment Method: Cash/Card/Bank Transfer");
+            
+            if (!AccountService.getYesNoInput(scanner, "Customer paid deposit?")) {
+                if (AccountService.getYesNoInput(scanner, "Cancel booking?")) {
+                    System.out.println("Booking cancelled - customer did not pay deposit.");
+                    return;
+                } else {
+                    System.out.println("Returning to booking confirmation...");
+                    return;
+                }
+            }
+            
+            System.out.println("✓ Deposit payment confirmed!");
         }
 
         try {
@@ -2691,7 +2853,7 @@ public class RentalSystem {
         }
 
         // Ask if user wants to view detailed ticket
-        System.out.print("\nEnter ticket number to view details (or 0 to return): ");
+        System.out.print("\nEnter index number to view details (or 0 to return): ");
         try {
             int choice = Integer.parseInt(scanner.nextLine());
             if (choice > 0 && choice <= customerTickets.size()) {
@@ -2724,9 +2886,9 @@ public class RentalSystem {
 
         System.out.println("Pending bookings:");
         for (Rental r : pendingRentals) {
-            System.out.println("ID: " + r.getId() + ", Vehicle: " + r.getVehicle().getBrand() +
-                    " " + r.getVehicle().getModel() + ", Dates: " + r.getStartDate() +
-                    " to " + r.getEndDate());
+            System.out.println("ID: " + r.getId() + ", Vehicle: " + r.getVehicle().getBrand()
+                    + " " + r.getVehicle().getModel() + ", Dates: " + r.getStartDate()
+                    + " to " + r.getEndDate());
         }
 
         System.out.print("Enter rental ID to cancel: ");

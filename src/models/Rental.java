@@ -1,9 +1,10 @@
-package models;  
-import java.time.LocalDate;
+package models;
 
 import enums.RentalStatus;
+import java.time.LocalDate;
 
 public class Rental {
+
     private int id;
     private Customer customer;
     private Vehicle vehicle;
@@ -17,8 +18,8 @@ public class Rental {
     private boolean dueSoonReminderSent; // Reminder sent before return
     private boolean overdueReminderSent; // Overdue reminder sent
 
-    public Rental(int id, Customer customer, Vehicle vehicle, LocalDate startDate, LocalDate endDate, 
-                  RentalStatus status, double totalFee, boolean insuranceSelected, String username) {
+    public Rental(int id, Customer customer, Vehicle vehicle, LocalDate startDate, LocalDate endDate,
+            RentalStatus status, double totalFee, boolean insuranceSelected, String username) {
         this.id = id;
         this.customer = customer;
         this.vehicle = vehicle;
@@ -32,41 +33,101 @@ public class Rental {
     }
 
     // Getters and setters
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public int getId() {
+        return id;
+    }
 
-    public Customer getCustomer() { return customer; }
-    public void setCustomer(Customer customer) { this.customer = customer; }
+    public void setId(int id) {
+        this.id = id;
+    }
 
-    public Vehicle getVehicle() { return vehicle; }
-    public void setVehicle(Vehicle vehicle) { this.vehicle = vehicle; }
+    public Customer getCustomer() {
+        return customer;
+    }
 
-    public LocalDate getStartDate() { return startDate; }
-    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
 
-    public LocalDate getEndDate() { return endDate; }
-    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
+    public Vehicle getVehicle() {
+        return vehicle;
+    }
 
-    public RentalStatus getStatus() { return status; }
-    public void setStatus(RentalStatus status) { this.status = status; }
+    public void setVehicle(Vehicle vehicle) {
+        this.vehicle = vehicle;
+    }
 
-    public double getTotalFee() { return totalFee; }
-    public void setTotalFee(double totalFee) { this.totalFee = totalFee; }
+    public LocalDate getStartDate() {
+        return startDate;
+    }
 
-    public double getActualFee() { return actualFee; }
-    public void setActualFee(double actualFee) { this.actualFee = actualFee; }
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
 
-    public boolean isInsuranceSelected() { return insuranceSelected; }
-    public void setInsuranceSelected(boolean insuranceSelected) { this.insuranceSelected = insuranceSelected; }
+    public LocalDate getEndDate() {
+        return endDate;
+    }
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
 
-    public boolean isDueSoonReminderSent() { return dueSoonReminderSent; }
-    public void setDueSoonReminderSent(boolean dueSoonReminderSent) { this.dueSoonReminderSent = dueSoonReminderSent; }
+    public RentalStatus getStatus() {
+        return status;
+    }
 
-    public boolean isOverdueReminderSent() { return overdueReminderSent; }
-    public void setOverdueReminderSent(boolean overdueReminderSent) { this.overdueReminderSent = overdueReminderSent; }
+    public void setStatus(RentalStatus status) {
+        this.status = status;
+    }
+
+    public double getTotalFee() {
+        return totalFee;
+    }
+
+    public void setTotalFee(double totalFee) {
+        this.totalFee = totalFee;
+    }
+
+    public double getActualFee() {
+        return actualFee;
+    }
+
+    public void setActualFee(double actualFee) {
+        this.actualFee = actualFee;
+    }
+
+    public boolean isInsuranceSelected() {
+        return insuranceSelected;
+    }
+
+    public void setInsuranceSelected(boolean insuranceSelected) {
+        this.insuranceSelected = insuranceSelected;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public boolean isDueSoonReminderSent() {
+        return dueSoonReminderSent;
+    }
+
+    public void setDueSoonReminderSent(boolean dueSoonReminderSent) {
+        this.dueSoonReminderSent = dueSoonReminderSent;
+    }
+
+    public boolean isOverdueReminderSent() {
+        return overdueReminderSent;
+    }
+
+    public void setOverdueReminderSent(boolean overdueReminderSent) {
+        this.overdueReminderSent = overdueReminderSent;
+    }
 
     public int getRentalDays() {
         return (int) java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1;
@@ -84,7 +145,7 @@ public class Rental {
     @Override
     public String toString() {
         return String.format("Rental ID: %d, Customer: %s, Vehicle: %s %s, Period: %s to %s, Status: %s, Fee: RM%.2f",
-                           id, customer.getName(), vehicle.getBrand(), vehicle.getModel(), 
-                           startDate, endDate, status, totalFee);
+                id, customer.getName(), vehicle.getBrand(), vehicle.getModel(),
+                startDate, endDate, status, totalFee);
     }
-} 
+}

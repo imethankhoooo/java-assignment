@@ -4,7 +4,6 @@ import enums.AccountRole;
 import interfaces.User;
 
 public abstract class Account implements User {
-
     private String username;
     private String password;
     private AccountRole role;
@@ -82,8 +81,13 @@ public abstract class Account implements User {
             return;
         }
         String e = email.trim();
-        if (!(e.contains("@") && e.contains(".") && e.indexOf("@") < e.lastIndexOf("."))) {
-            throw new IllegalArgumentException("Invalid email format");
+        
+        // Enhanced email validation with regex
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@" +
+                           "(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        
+        if (!e.matches(emailRegex)) {
+            throw new IllegalArgumentException("Invalid email format - must have at least one character before @");
         }
         this.email = e;
     }

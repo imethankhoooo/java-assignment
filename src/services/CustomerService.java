@@ -158,7 +158,7 @@ public class CustomerService extends AccountService {
         while (true) {
             clearScreen();
             System.out.println("╔══════════════════════════════════════════════════════════════════╗");
-            System.out.println("║                         CUSTOMER PROFILE                         ║");
+            System.out.println("║                         ACCOUNT MANAGEMENT                       ║");
             System.out.println("╠══════════════════════════════════════════════════════════════════╣");
             System.out.println("║ 1. View Profile Information                                      ║");
             System.out.println("║ 2. Update Profile Information                                    ║");

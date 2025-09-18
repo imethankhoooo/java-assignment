@@ -25,10 +25,6 @@ public class ReportManager {
         rentalHistoryManager.addRental(rental);
     }
 
-    // === Functions ===
-
-
-
     /** Quick run of monthly report */
     public void runMonthlyReport(Scanner scanner) {
         ReportService.generateMonthlyReport(rentalHistoryManager.getRentalHistory(), scanner);

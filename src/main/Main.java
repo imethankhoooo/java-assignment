@@ -7,8 +7,6 @@ import models.*;
 import services.*;
 import static services.UtilityService.*;
 
-
-
 /**
  * Main program entry point, handles data loading, login, and menu navigation
  */
@@ -161,7 +159,7 @@ public class Main {
             String choice = scanner.nextLine();
             switch (choice) {
                 case "1":
-                    AccountService.adminUserManagement(scanner);
+                    AccountService.adminUserManagement(scanner, system);
                     break;
                 case "2":
                     AdminService.manageVehicles(scanner);

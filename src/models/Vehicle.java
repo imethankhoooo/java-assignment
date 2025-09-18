@@ -304,7 +304,7 @@ public class Vehicle {
     @Override
     public String toString() {
         return String.format(
-                "║ %-8s %-10s %-10s %-12s %-15s %-8s %-10s %-6d %-8.1f %-10s %-12.2f %-15s ║",
+                "║ %-13s %-12s %-10s %-10s %-13s %-10s %-10s %-15d %-12.1f %-12s %-15.2f %-15s ║",
                 vehicleID, plateNo, carBrand, carModel, carType,
                 fuelType, color, purchaseYear, capacity,
                 condition, basePrice, statusToString(status)

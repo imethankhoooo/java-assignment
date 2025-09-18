@@ -247,133 +247,6 @@ public class AccountService {
     }
 
     /**
-     * Add new account with notification service update
-     *
-     * @param account Account to add
-     * @return true if added successfully, false if username already exists
-     */
-    public static boolean addAccountWithNotification(Account account) {
-        if (!addAccount(account)) {
-            return false;
-        }
-
-        // Update notification service if available
-        try {
-            NotificationService notificationService = new NotificationService();
-            notificationService.loadUserEmailsFromAccounts(getAccounts());
-        } catch (Exception e) {
-            // Ignore notification service errors during account creation
-        }
-
-        return true;
-    }
-
-    /**
-     * Update existing account with notification service update
-     *
-     * @param username Username of account to update
-     * @param updatedAccount Updated account information
-     * @return true if updated successfully, false if account not found
-     */
-    public static boolean updateAccountWithNotification(String username, Account updatedAccount) {
-        Account existingAccount = getAccountByUsername(username);
-        if (existingAccount == null) {
-            return false;
-        }
-
-        existingAccount.setEmail(updatedAccount.getEmail());
-        existingAccount.setFullName(updatedAccount.getFullName());
-        existingAccount.setContactNumber(updatedAccount.getContactNumber());
-
-        // Update customer-specific fields only if both are Customer instances
-        if (existingAccount instanceof Customer && updatedAccount instanceof Customer) {
-            Customer existingCustomer = (Customer) existingAccount;
-            Customer updatedCustomer = (Customer) updatedAccount;
-            existingCustomer.setAddress(updatedCustomer.getAddress());
-            existingCustomer.setDateOfBirth(updatedCustomer.getDateOfBirth());
-            existingCustomer.setLicenseNumber(updatedCustomer.getLicenseNumber());
-            existingCustomer.setEmergencyContact(updatedCustomer.getEmergencyContact());
-        }
-
-        // Update notification service if available
-        try {
-            NotificationService notificationService = new NotificationService();
-            notificationService.loadUserEmailsFromAccounts(getAccounts());
-        } catch (Exception e) {
-            // Ignore notification service errors during account update
-        }
-
-        return true;
-    }
-
-    /**
-     * Delete account with notification service update
-     *
-     * @param username Username of account to delete
-     * @return true if deleted successfully, false if account not found
-     */
-    public static boolean deleteAccountWithNotification(String username) {
-        Account account = getAccountByUsername(username);
-        if (account == null) {
-            return false;
-        }
-
-        boolean deleted = deleteAccount(username);
-
-        if (deleted) {
-            // Update notification service if available
-            try {
-                NotificationService notificationService = new NotificationService();
-                notificationService.loadUserEmailsFromAccounts(getAccounts());
-            } catch (Exception e) {
-                // Ignore notification service errors during account deletion
-            }
-        }
-
-        return deleted;
-    }
-
-    /**
-     * Search accounts by role and search term
-     *
-     * @param searchTerm Search term (can be null for all accounts)
-     * @param role Account role filter (can be null for all roles)
-     * @return List of accounts matching the search criteria
-     */
-    public static List<Account> searchAccountsAdvanced(String searchTerm, AccountRole role) {
-        List<Account> results = new ArrayList<>();
-        String searchLower = searchTerm == null ? "" : searchTerm.toLowerCase().trim();
-
-        for (Account account : accounts) {
-            if (role != null && account.getRole() != role) {
-                continue;
-            }
-
-            boolean matches = false;
-
-            if (searchLower.isEmpty()) {
-                matches = true;
-            } else {
-                matches = account.getUsername().toLowerCase().contains(searchLower)
-                        || (account.getFullName() != null && account.getFullName().toLowerCase().contains(searchLower))
-                        || (account.getContactNumber() != null && account.getContactNumber().contains(searchTerm))
-                        || (account.getEmail() != null && account.getEmail().toLowerCase().contains(searchLower));
-
-                // Admin ID search
-                if (!matches && account instanceof Admin) {
-                    Admin admin = (Admin) account;
-                    matches = admin.getAdminId().toLowerCase().contains(searchLower);
-                }
-            }
-
-            if (matches) {
-                results.add(account);
-            }
-        }
-        return results;
-    }
-
-    /**
      * Get all accounts by role
      *
      * @param role Account role to filter by
@@ -587,8 +460,15 @@ public class AccountService {
     }
 
     public static boolean isValidEmail(String email) {
-        return email != null && email.contains("@") && email.contains(".")
-                && email.indexOf("@") < email.lastIndexOf(".");
+        if (email == null || email.trim().isEmpty()) {
+            return false;
+        }
+        
+        // Enhanced email validation regex
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@" +
+                           "(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        
+        return email.matches(emailRegex);
     }
 
     public static boolean isValidFullName(String fullName) {
@@ -1114,7 +994,7 @@ public class AccountService {
         clearScreen();
     }
 
-    public static void viewAllUserAccounts(Scanner scanner) {
+    public static void viewAllUserAccounts(Scanner scanner, RentalSystem system) {
         clearScreen();
 
         System.out.println("╔══════════════════════════════════════════════════════════════════════════════════════════════════════╗");
@@ -1155,14 +1035,11 @@ public class AccountService {
 
         String choice = scanner.nextLine();
         if (choice.equals("1")) {
-            searchAndManageUserAccounts(scanner);
+            searchAndManageUserAccounts(scanner, system);
         }
     }
 
-    /**
-     * Search and manage user accounts (integrated functionality)
-     */
-    public static void searchAndManageUserAccounts(Scanner scanner) {
+    public static void searchAndManageUserAccounts(Scanner scanner, RentalSystem system) {
         while (true) {
             clearScreen();
             System.out.println("╔══════════════════════════════════════════════════════════════════╗");
@@ -1249,7 +1126,7 @@ public class AccountService {
                 int accountIndex = Integer.parseInt(choice) - 1;
                 if (accountIndex >= 0 && accountIndex < results.size()) {
                     Account selectedAccount = results.get(accountIndex);
-                    manageSelectedAccount(scanner, selectedAccount);
+                    manageSelectedAccount(scanner, selectedAccount, system);
                 } else {
                     System.out.println("Invalid account number.");
                     System.out.println("Press Enter to continue...");
@@ -1263,7 +1140,7 @@ public class AccountService {
         }
     }
 
-    public static void manageSelectedAccount(Scanner scanner, Account account) {
+    public static void manageSelectedAccount(Scanner scanner, Account account, RentalSystem system) {
         while (true) {
             clearScreen();
             System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
@@ -1305,7 +1182,7 @@ public class AccountService {
                     modifySelectedAccount(scanner, account);
                     break;
                 case "2":
-                    if (deleteSelectedAccount(scanner, account)) {
+                    if (deleteSelectedAccount(scanner, account, system)) {
                         return;
                     }
                     break;
@@ -1319,18 +1196,23 @@ public class AccountService {
         }
     }
 
-    public static void addNewUserAccount(Scanner scanner) {
+    public static boolean addNewUserAccount(Scanner scanner) {
         clearScreen();
         System.out.println("\n");
         System.out.println("╔══════════════════════════════════════════════════════════════════╗");
         System.out.println("║                       ADD NEW USER ACCOUNT                       ║");
         System.out.println("╚══════════════════════════════════════════════════════════════════╝");
+        System.out.println("Type 'q' at any time to cancel.\n");
 
         // Basic account information
         String username;
         while (true) {
             System.out.print("Username: ");
             username = scanner.nextLine().trim();
+            if (username.equalsIgnoreCase("q")) {
+                System.out.println("Account creation cancelled.");
+                return false;
+            }
             if (username.isEmpty()) {
                 System.out.println("Username cannot be empty.");
                 continue;
@@ -1344,8 +1226,12 @@ public class AccountService {
 
         String password;
         while (true) {
-            System.out.print("Password: ");
+            System.out.print("\nPassword: ");
             password = scanner.nextLine();
+            if (password.equalsIgnoreCase("q")) {
+                System.out.println("Account creation cancelled.");
+                return false;
+            }
             if (password.length() < 4) {
                 System.out.println("Password must be at least 4 characters long.");
                 continue;
@@ -1357,11 +1243,15 @@ public class AccountService {
         password = hashPassword(password);
 
         // Role selection
-        System.out.println("Select role:");
-        System.out.println("1. Customer");
-        System.out.println("2. Admin");
+        System.out.println("\nSelect role:");
+        System.out.println("\t1. Customer");
+        System.out.println("\t2. Admin");
         System.out.print("Select option: ");
         String roleChoice = scanner.nextLine();
+        if (roleChoice.equalsIgnoreCase("q")) {
+            System.out.println("Account creation cancelled.");
+            return false;
+        }
 
         AccountRole role;
         switch (roleChoice) {
@@ -1379,8 +1269,12 @@ public class AccountService {
 
         String email;
         while (true) {
-            System.out.print("Email: ");
+            System.out.print("\nEmail: ");
             email = scanner.nextLine().trim();
+            if (email.equalsIgnoreCase("q")) {
+                System.out.println("Account creation cancelled.");
+                return false;
+            }
             if (!isValidEmail(email)) {
                 System.out.println("Please enter a valid email address.");
                 continue;
@@ -1388,18 +1282,30 @@ public class AccountService {
             break;
         }
 
-        System.out.print("Full Name: ");
+        System.out.print("\nFull Name: ");
         String fullName = scanner.nextLine().trim();
+        if (fullName.equalsIgnoreCase("q")) {
+            System.out.println("Account creation cancelled.");
+            return false;
+        }
         while (fullName.isEmpty()) {
             System.out.println("Full name is required.");
-            System.out.print("Full Name: ");
+            System.out.print("\nFull Name: ");
             fullName = scanner.nextLine().trim();
+            if (fullName.equalsIgnoreCase("q")) {
+                System.out.println("Account creation cancelled.");
+                return false;
+            }
         }
 
         String contactNumber;
         while (true) {
-            System.out.print("Contact Number (60xxxxxxxxx): ");
+            System.out.print("\nContact Number (60xxxxxxxxx): ");
             contactNumber = scanner.nextLine().trim();
+            if (contactNumber.equalsIgnoreCase("q")) {
+                System.out.println("Account creation cancelled.");
+                return false;
+            }
             if (!isValidContactNumber(contactNumber)) {
                 System.out.println("Contact number must start with 60 and be 11-13 digits long.");
                 continue;
@@ -1407,15 +1313,23 @@ public class AccountService {
             break;
         }
 
-        System.out.print("Address: ");
+        System.out.print("\nAddress: ");
         String address = scanner.nextLine().trim();
+        if (address.equalsIgnoreCase("q")) {
+            System.out.println("Account creation cancelled.");
+            return false;
+        }
 
         String licenseNumber = "";
         String dateOfBirth = "";
         if (role == AccountRole.CUSTOMER) {
             while (true) {
-                System.out.print("IC/License Number (xxxxxx-xx-xxxx): ");
+                System.out.print("\nIC/License Number (xxxxxx-xx-xxxx): ");
                 licenseNumber = scanner.nextLine().trim();
+                if (licenseNumber.equalsIgnoreCase("q")) {
+                    System.out.println("Account creation cancelled.");
+                    return false;
+                }
                 if (!licenseNumber.isEmpty() && !isValidLicenseNumber(licenseNumber)) {
                     System.out.println("Please enter a valid IC number in format: xxxxxx-xx-xxxx");
                     continue;
@@ -1431,10 +1345,14 @@ public class AccountService {
             }
         }
 
-        System.out.print("Emergency Contact Number (optional): ");
+        System.out.print("\nEmergency Contact Number (optional): ");
         String emergencyContact = scanner.nextLine().trim();
+        if (emergencyContact.equalsIgnoreCase("q")) {
+            System.out.println("Account creation cancelled.");
+            return false;
+        }
 
-        // Create and save account
+        // Create account object
         Account newAccount;
         if (role == AccountRole.ADMIN) {
             newAccount = new Admin(username, password, email, fullName, contactNumber);
@@ -1444,6 +1362,14 @@ public class AccountService {
                     licenseNumber, emergencyContact);
         }
 
+        // Final confirmation
+        System.out.print("\nConfirm account creation? (Y/N): ");
+        String confirm = scanner.nextLine().trim();
+        if (!confirm.equalsIgnoreCase("Y") && !confirm.equalsIgnoreCase("Yes")) {
+            System.out.println("Account creation cancelled.");
+            return false;
+        }
+
         if (addAccount(newAccount)) {
             saveAccounts("accounts.json");
             System.out.println("\nAccount created successfully!");
@@ -1451,15 +1377,14 @@ public class AccountService {
             System.out.println("Role: " + role);
         } else {
             System.out.println("Failed to create account.");
+            return false;
         }
 
         System.out.println("Press Enter to continue...");
         scanner.nextLine();
+        return true;
     }
 
-    /**
-     * Modify selected account (integrated version)
-     */
     public static void modifySelectedAccount(Scanner scanner, Account account) {
         System.out.println("\n");
         System.out.println("=== Which information would you like to modify? ===");
@@ -1640,7 +1565,51 @@ public class AccountService {
         scanner.nextLine();
     }
 
-    public static boolean deleteSelectedAccount(Scanner scanner, Account account) {
+    // Helper method to check if user has active bookings
+    public static boolean hasActiveBookings(String username, RentalSystem system) {
+        if (system == null) return false;
+        
+        for (Rental rental : system.getRentals()) {
+            if (rental.getUsername().equals(username) && 
+                (rental.getStatus() == RentalStatus.ACTIVE || rental.getStatus() == RentalStatus.PENDING)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean deleteSelectedAccount(Scanner scanner, Account account, RentalSystem system) {
+        // Check for active bookings first
+        if (hasActiveBookings(account.getUsername(), system)) {
+            System.out.println("\n WARNING: This user has active or pending rentals!");
+            System.out.println("Deleting this account may cause data inconsistency.");
+            
+            // Show active rental details
+            System.out.println("\nActive/Pending Rentals:");
+            for (Rental rental : system.getRentals()) {
+                if (rental.getUsername().equals(account.getUsername()) && 
+                    (rental.getStatus() == RentalStatus.ACTIVE || rental.getStatus() == RentalStatus.PENDING)) {
+                    System.out.printf("- Rental ID: %d, Vehicle: %s %s, Period: %s to %s, Status: %s\n",
+                        rental.getId(),
+                        rental.getVehicle().getBrand(),
+                        rental.getVehicle().getModel(),
+                        rental.getStartDate(),
+                        rental.getEndDate(),
+                        rental.getStatus());
+                }
+            }
+            
+            System.out.print("\nTo proceed with deletion despite active rentals, type the username '" + account.getUsername() + "': ");
+            String confirmUsername = scanner.nextLine().trim();
+            
+            if (!confirmUsername.equals(account.getUsername())) {
+                System.out.println("Username confirmation failed. Account deletion cancelled.");
+                System.out.println("Press Enter to continue...");
+                scanner.nextLine();
+                return false;
+            }
+        }
+        
         // Prevent admin from deleting themselves
         System.out.print("\nEnter your admin username for confirmation: ");
         String adminUsername = scanner.nextLine().trim();
@@ -1681,7 +1650,7 @@ public class AccountService {
         return false;
     }
 
-    public static void adminUserManagement(Scanner scanner) {
+    public static void adminUserManagement(Scanner scanner, RentalSystem system) {
         boolean firstTime = true;
         while (true) {
             // Clear screen after first time
@@ -1692,7 +1661,7 @@ public class AccountService {
 
             clearScreen();
             System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
-            System.out.println("║                       USER MANAGEMENT                            ║");
+            System.out.println("║                     USER ACCOUNT MANAGEMENT                      ║");
             System.out.println("╠══════════════════════════════════════════════════════════════════╣");
             System.out.println("║  1. View All User Accounts                                       ║");
             System.out.println("║  2. Search & Manage User Accounts                                ║");
@@ -1704,10 +1673,10 @@ public class AccountService {
             String choice = scanner.nextLine();
             switch (choice) {
                 case "1":
-                    viewAllUserAccounts(scanner);
+                    viewAllUserAccounts(scanner, system);
                     break;
                 case "2":
-                    searchAndManageUserAccounts(scanner);
+                    searchAndManageUserAccounts(scanner, system);
                     break;
                 case "3":
                     addNewUserAccount(scanner);

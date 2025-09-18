@@ -19,10 +19,6 @@ public class AdminService extends AccountService {
         return admins;
     }
 
-    public static void manageUsers(Scanner scanner) {
-        adminUserManagement(scanner);
-    }
-
     public static void manageVehicles(Scanner scanner) {
         while (true) {
             clearScreen();
@@ -157,7 +153,7 @@ public class AdminService extends AccountService {
         while (true) {
             clearScreen();
             System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
-            System.out.println("║                           ADMIN PROFILE                          ║");
+            System.out.println("║                    ADMIN PROFILE MANAGEMENT                      ║");
             System.out.println("╠══════════════════════════════════════════════════════════════════╣");
             System.out.println("║ 1. View Profile Information                                      ║");
             System.out.println("║ 2. Update Profile Information                                    ║");

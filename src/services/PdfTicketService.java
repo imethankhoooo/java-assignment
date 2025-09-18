@@ -89,7 +89,7 @@ public class PdfTicketService {
         titleCell.setBackgroundColor(PRIMARY_COLOR);
         titleCell.setPadding(15f);
         
-        Paragraph companyName = new Paragraph("PREMIUM VEHICLE RENTAL", 
+        Paragraph companyName = new Paragraph("CARSEEK", 
                                             new Font(baseFont, 14, Font.BOLD, BaseColor.WHITE));
         companyName.setAlignment(Element.ALIGN_LEFT);
         titleCell.addElement(companyName);
@@ -234,7 +234,7 @@ public class PdfTicketService {
         instructionsCell.setPadding(10f);
         instructionsCell.setBackgroundColor(BaseColor.WHITE);
         
-        Paragraph instTitle = new Paragraph("📋 PICKUP INSTRUCTIONS", 
+        Paragraph instTitle = new Paragraph("PICKUP INSTRUCTIONS", 
                                           new Font(baseFont, 11, Font.BOLD, TEXT_COLOR));
         instTitle.setSpacingAfter(6f);
         instructionsCell.addElement(instTitle);
@@ -263,7 +263,7 @@ public class PdfTicketService {
         locationCell.setPadding(10f);
         locationCell.setBackgroundColor(BACKGROUND_COLOR);
         
-        Paragraph locTitle = new Paragraph("📍 PICKUP LOCATION", 
+        Paragraph locTitle = new Paragraph("PICKUP LOCATION", 
                                          new Font(baseFont, 11, Font.BOLD, TEXT_COLOR));
         locTitle.setSpacingAfter(6f);
         locationCell.addElement(locTitle);
@@ -273,12 +273,12 @@ public class PdfTicketService {
         address.setSpacingAfter(6f);
         locationCell.addElement(address);
         
-        Paragraph hours = new Paragraph("🕐 HOURS\n8:00 AM - 6:00 PM\n(Monday - Sunday)", 
+        Paragraph hours = new Paragraph("HOURS\n8:00 AM - 6:00 PM\n(Monday - Sunday)", 
                                       new Font(baseFont, 8, Font.NORMAL, SECONDARY_COLOR));
         hours.setSpacingAfter(6f);
         locationCell.addElement(hours);
         
-        Paragraph contact = new Paragraph("📞 CONTACT\n+1-800-RENTAL\nsupport@premium.com", 
+        Paragraph contact = new Paragraph("CONTACT\n+1-800-RENTAL\nsupport@premium.com", 
                                         new Font(baseFont, 8, Font.NORMAL, ACCENT_COLOR));
         locationCell.addElement(contact);
         
@@ -298,7 +298,7 @@ public class PdfTicketService {
         noticesCell.setBorderWidth(0.5f);
         noticesCell.setPadding(8f);
         
-        Paragraph noticesTitle = new Paragraph("⚠️ IMPORTANT NOTICES", 
+        Paragraph noticesTitle = new Paragraph("IMPORTANT NOTICES", 
                                              new Font(baseFont, 9, Font.BOLD, WARNING_COLOR));
         noticesTitle.setSpacingAfter(4f);
         noticesCell.addElement(noticesTitle);
@@ -321,13 +321,13 @@ public class PdfTicketService {
         footerCell.setBorder(Rectangle.NO_BORDER);
         footerCell.setPadding(10f);
         
-        Paragraph thankYou = new Paragraph("✨ Thank you for choosing Premium Vehicle Rental! ✨", 
+        Paragraph thankYou = new Paragraph("Thank you for choosing CarSeek!", 
                                          new Font(smallFont.getBaseFont(), 10, Font.BOLD, BaseColor.WHITE));
         thankYou.setAlignment(Element.ALIGN_CENTER);
         thankYou.setSpacingAfter(4f);
         footerCell.addElement(thankYou);
         
-        Paragraph tagline = new Paragraph("Your Journey, Our Priority • Premium Service Since 2020", 
+        Paragraph tagline = new Paragraph("Your Journey, Our Priority • CarSeek Since 2015", 
                                         new Font(smallFont.getBaseFont(), 8, Font.NORMAL, new BaseColor(200, 220, 255)));
         tagline.setAlignment(Element.ALIGN_CENTER);
         footerCell.addElement(tagline);

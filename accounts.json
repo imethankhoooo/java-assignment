@@ -40,7 +40,7 @@
     "password": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
     "role": "ADMIN",
     "email": "ethankhoo05@gmail.com",
-    "fullName": "Ethan Khoo Tsui Ern",
+    "fullName": "Ethan Khoo",
     "contactNumber": "60124512565",
     "adminId": "A003"
   },
@@ -59,10 +59,25 @@
   {
     "username": "SELENA",
     "password": "2025d54dfb0f1b28e394ebf4fb5b71f471926d4972cfc4d944bf491c8f9a8892",
-    "role": "ADMIN",
-    "email": "SELENA@gmail.com",
+    "role": "CUSTOMER",
+    "email": "yokeying0506@gmail.com",
     "fullName": "SELENA TAN",
-    "contactNumber": "60125458565",
-    "adminId": "A004"
+    "contactNumber": "60125465425",
+    "address": "WANGSA MAJU",
+    "dateOfBirth": "2004-02-15",
+    "licenseNumber": "040215-10-4512",
+    "emergencyContact": ""
+  },
+  {
+    "username": "Ethan Khoo Tsui Ern",
+    "password": "1229e0b7a82ddd3f554efd8bc31986e0167ad168992a8ce1e660ba04a31e28b6",
+    "role": "CUSTOMER",
+    "email": "yokeying0506@gmail.com",
+    "fullName": "Ethan Khoo",
+    "contactNumber": "60124546545",
+    "address": "TARUMT",
+    "dateOfBirth": "2005-01-01",
+    "licenseNumber": "050101-10-2542",
+    "emergencyContact": ""
   }
 ]

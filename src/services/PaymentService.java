@@ -281,7 +281,7 @@ public class PaymentService {
         System.out.printf("Customer       : %s\n", rental.getCustomer().getName());
         System.out.printf("Vehicle        : %s %s (%s)\n",
                 rental.getVehicle().getBrand(), rental.getVehicle().getModel(), rental.getVehicle().getCarPlate());
-        System.out.printf("Rental Period  : %s → %s\n", rental.getStartDate(), rental.getEndDate());
+        System.out.printf("Rental Period  : %s - %s\n", rental.getStartDate(), rental.getEndDate());
         System.out.printf("Base Fee       : RM%.2f\n", baseFee);
         System.out.printf("Discount       : RM%.2f\n", baseFee * discount);
         System.out.printf("Late Fee       : RM%.2f\n", lateFee);
@@ -297,7 +297,7 @@ public class PaymentService {
         System.out.printf("Customer        : %s\n", rental.getCustomer().getName());
         System.out.printf("Vehicle         : %s %s\n", rental.getVehicle().getBrand(), rental.getVehicle().getModel());
         System.out.printf("Car Plate       : %s\n", rental.getVehicle().getCarPlate());
-        System.out.printf("Rental Period   : %s → %s\n", rental.getStartDate(), rental.getEndDate());
+        System.out.printf("Rental Period   : %s - %s\n", rental.getStartDate(), rental.getEndDate());
         System.out.printf("Base Fee        : RM%.2f\n", rental.getTotalFee());
         System.out.printf("Discount        : RM%.2f\n", rental.getTotalFee() * discount);
         System.out.printf("Late Fee        : RM%.2f\n", lateFee);
@@ -360,8 +360,8 @@ public class PaymentService {
             System.out.println("\n╔══════════════════════════════════════════════════════════════════╗");
             System.out.println("║                         PAYMENT MANAGEMENT                       ║");
             System.out.println("╠══════════════════════════════════════════════════════════════════╣");
-            System.out.println("║ 1. View Payment History                                           ║");
-            System.out.println("║ 0. Back to Main Menu                                              ║");
+            System.out.println("║ 1. View Payment History                                          ║");
+            System.out.println("║ 0. Back to Main Menu                                             ║");
             System.out.println("╚══════════════════════════════════════════════════════════════════╝");
             System.out.print("Select option: ");
             String choice = scanner.nextLine();

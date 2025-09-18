@@ -26,7 +26,6 @@ public class Customer extends Account {
         this.emergencyContact = emergencyContact != null ? emergencyContact : "";
     }
 
-
     public String getName() {
         return getFullName();
     }
@@ -94,7 +93,6 @@ public class Customer extends Account {
         boolean basicValid = getFullName() != null && !getFullName().trim().isEmpty() &&
                             getContactNumber() != null && !getContactNumber().trim().isEmpty();
         
-        // Optional: validate license number format if provided
         boolean licenseValid = licenseNumber == null || licenseNumber.isEmpty() ||
                               licenseNumber.matches("\\d{6}-\\d{2}-\\d{4}");
         

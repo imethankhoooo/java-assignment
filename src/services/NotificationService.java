@@ -1,12 +1,10 @@
 package services;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-
 import enums.MessageType;
 import enums.RentalStatus;
-
+import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import models.*;
 
 public class NotificationService {
@@ -240,13 +238,13 @@ public class NotificationService {
         if (recipientEmail != null && !recipientEmail.isEmpty()) {
             String emailSubject = "New Message from " + fromUser + " - " + subject;
             String emailContent = String.format(
-                "You have received a new message in the Vehicle Rental System.\n\n" +
+                "You have received a new message in CarSeek.\n\n" +
                 "From: %s\n" +
                 "Subject: %s\n" +
                 "Message: %s\n\n" +
                 "Please log in to the system to view and respond to this message.\n\n" +
                 "Best regards,\n" +
-                "Vehicle Rental System",
+                "CarSeek",
                 fromUser, subject, content
             );
             

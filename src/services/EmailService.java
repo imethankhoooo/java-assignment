@@ -282,7 +282,7 @@ public class EmailService {
             "Please ensure to return the vehicle on time to avoid additional charges.\n\n" +
             "Thank you for choosing our rental service!\n\n" +
             "Best regards,\n" +
-            "Rental Management System",
+            "CarSeek",
             username, vehicleModel, dueDate
         );
         
@@ -298,7 +298,7 @@ public class EmailService {
             "Late fees may apply according to our rental agreement.\n\n" +
             "Contact us immediately if you need assistance.\n\n" +
             "Best regards,\n" +
-            "Rental Management System",
+            "CarSeek",
             username, vehicleModel, dueDate
         );
         
@@ -316,7 +316,7 @@ public class EmailService {
             "Please bring a valid driver's license and payment method when picking up the vehicle.\n" +
             "Thank you for choosing our rental service!\n" +
             "Best regards,\n" +
-            "Rental Management System",
+            "CarSeek",
             username, vehicleModel, startDate, endDate, totalFee
         );
         
@@ -332,7 +332,7 @@ public class EmailService {
             "Please bring your driver's license and payment confirmation.\n" +
             "Thank you for choosing our rental service!\n" +
             "Best regards,\n" +
-            "Rental Management System",
+            "CarSeek",
             username, vehicleModel
         );
         
@@ -353,7 +353,7 @@ public class EmailService {
             "You can view your complete ticket details in the customer portal.\n" +
             "Thank you for choosing our rental service!\n" +
             "Best regards,\n" +
-            "Vehicle Rental Management System",
+            "CarSeek",
             username, vehicleModel, ticketId, ticketId
         );
         
